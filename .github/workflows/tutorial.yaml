@@ -29,11 +29,12 @@ jobs:
 
     - name: 'add comment'
       env:
-        GITHUB_TOKEN: ${{ secrets.PAT }}
+        REPO_TOKEN: ${{ secrets.PAT }}
       run: |
         COMMENT=$(cat score.txt)
-        echo ${GITHUB_TOKEN}
-        curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\":\"Test Results: ${COMMENT} \"}" "https://api.github.com/repos/tqlong/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST}/comments"
+        echo ***$REPO_TOKEN///
+        echo ***$COMMENT///
+        curl -H "Authorization: token $REPO_TOKEN" -X POST -d "{\"body\":\"Test Results: $COMMENT \"}" "https://api.github.com/repos/tqlong/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST}/comments"
 
     - name: 'check error'
       run: bash check_error.sh
