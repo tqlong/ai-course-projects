@@ -28,7 +28,6 @@ jobs:
         cat score.txt
 
     - name: Add Comment
-      uses: docker://alpine
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       run: |
