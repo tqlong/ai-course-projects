@@ -31,8 +31,8 @@ jobs:
     - name: 'add comment'
       run: |
         COMMENT=$(cat score.txt)
-        echo "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
-        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X POST -d "{\"body\":\"Test Results: ${COMMENT} \"}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
+        echo "https://api.github.com/repos/${{ github.repository }}/issues/${GITHUB_REF}/comments"
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X POST -d "{\"body\":\"Test Results: ${COMMENT} \"}" "https://api.github.com/repos/${{ github.repository }}/issues/${GITHUB_REF}/comments"
 
     - name: 'check error'
       run: bash check_error.sh
