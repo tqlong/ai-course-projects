@@ -1,4 +1,4 @@
-name: Ubuntu
+name: P0-Tutorial
 on:
   push:
     branches: [ main ]
@@ -11,7 +11,8 @@ jobs:
     env:
       OS: ubuntu-20.04
       PYTHON: '3.6'
-      CODECOV_TOKEN: 9a10fb40-3535-460e-8c7c-b2d9ecbc4149
+    permissions:
+      pull-requests: write
     steps:
     - uses: actions/checkout@master
     
@@ -24,4 +25,14 @@ jobs:
       run: |
         cd tutorial
         python autograder.py | sed '/FAIL/w /tmp/output'
-        bash ../check_error.sh
+        echo score = $(echo 9-$(bash ../check_grade.sh) | bc) > /tmp/score # score
+        cat /tmp/score
+
+    - name: 'write score to comment'
+      uses: mshick/add-pr-comment@v2
+      with:
+        message-path: /tmp/score
+        repo-token: ${{ secrets.PAT }}
+
+    - name: 'check error'
+      run: bash check_error.sh
