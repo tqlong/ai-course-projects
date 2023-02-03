@@ -30,7 +30,8 @@ jobs:
     - name: Add Comment
       uses: actions/docker@v2
       with:
-        args: sh -c 'apk add --no-cache curl jq && COMMENT=$(cat score.txt) && curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\":\"Test Results: \n\`\`\`\n${COMMENT}\n\`\`\`\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST}/comments"'
+        args: >-
+           sh -c 'apk add --no-cache curl jq && COMMENT=$(cat score.txt) && curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\":\"Test Results: ${COMMENT}\"}" "https://api.github.com/repos/tqlong/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST}/comments"'
       env:
         GITHUB_TOKEN: ${{ secrets.PAT }}
         IMAGE: alpine
