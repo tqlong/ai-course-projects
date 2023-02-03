@@ -32,6 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.PAT }}
       run: |
         COMMENT=$(cat score.txt)
+        echo ${GITHUB_TOKEN}
         curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\":\"Test Results: ${COMMENT} \"}" "https://api.github.com/repos/tqlong/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST}/comments"
 
     - name: 'check error'
