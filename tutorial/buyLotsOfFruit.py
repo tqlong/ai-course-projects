@@ -36,6 +36,15 @@ def buyLotsOfFruit(orderList):
     """
     totalCost = 0.0
     "*** YOUR CODE HERE ***"
+    for order in orderList:
+        fruit, quantity = order
+        price = fruitPrices.get(fruit)
+        if price is None:
+            return None
+        
+        totalCost += price * quantity
+
+
     return totalCost
 
 
