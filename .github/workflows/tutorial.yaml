@@ -29,12 +29,25 @@ jobs:
         echo score = $(echo 9-$(bash check_grade.sh) | bc) > score.txt # score
         cat score.txt
 
-    - name: 'add comment'
+    # - name: 'add comment'
+    #   run: |
+    #     COMMENT=$(cat score.txt)
+    #     pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+    #     echo "https://api.github.com/repos/${{ github.repository }}/issues/${pull_number}/comments"
+    #     curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X POST -d "{\"body\":\"Test Results: ${COMMENT} \"}" "https://api.github.com/repos/${{ github.repository }}/issues/${pull_number}/comments"
+
+    - name: Add comment to PR
+      env:
+        URL: ${{ github.event.pull_request.comments_url }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         COMMENT=$(cat score.txt)
-        pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
-        echo "https://api.github.com/repos/${{ github.repository }}/issues/${pull_number}/comments"
-        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -X POST -d "{\"body\":\"Test Results: ${COMMENT} \"}" "https://api.github.com/repos/${{ github.repository }}/issues/${pull_number}/comments"
+        curl \
+          -X POST \
+          $URL \
+          -H "Content-Type: application/json" \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          --data '{ "body": "$COMMENT" }'
 
     - name: 'check error'
       run: bash check_error.sh
