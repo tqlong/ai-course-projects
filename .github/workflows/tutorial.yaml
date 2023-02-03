@@ -1,7 +1,5 @@
 name: P0-Tutorial
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -25,14 +23,18 @@ jobs:
       run: |
         cd tutorial
         python autograder.py | sed '/FAIL/w /tmp/output'
-        echo score = $(echo 9-$(bash ../check_grade.sh) | bc) > /tmp/score # score
-        cat /tmp/score
+        cd ..
+        echo score = $(echo 9-$(bash check_grade.sh) | bc) > score.txt # score
+        cat score.txt
 
-#     - name: 'write score to comment'
-#       uses: mshick/add-pr-comment@v2
-#       with:
-#         message-path: /tmp/score
-#         repo-token: ${{ secrets.PAT }}
+    - name: Add Comment
+      uses: docker://alpine
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      run: |
+        apk add --no-cache curl jq
+        COMMENT=$(cat score.txt)
+        curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST -d "{\"body\":\"Test Results: \n\`\`\`\n${COMMENT}\n\`\`\`\"}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${GITHUB_PULL_REQUEST}/comments"
 
     - name: 'check error'
       run: bash check_error.sh
