@@ -1,0 +1,1 @@
+echo `cat /tmp/output | wc -l`
