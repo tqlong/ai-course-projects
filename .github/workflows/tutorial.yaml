@@ -30,14 +30,14 @@ jobs:
     - name: Add comment to PR
       env:
         URL: ${{ github.event.pull_request.comments_url }}
-        GITHUB_TOKEN: ${{ secrets.PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         COMMENT=$(cat score.txt)
         echo $URL
         curl \
           -X POST \
           -H "Content-Type: application/json" \
-          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Authorization: token ${{ secrets.PAT }}" \
           --data '{ "body": "$COMMENT" }' \
           $URL
 
