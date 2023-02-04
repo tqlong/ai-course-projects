@@ -9,10 +9,8 @@ jobs:
     env:
       OS: ubuntu-20.04
       PYTHON: '3.6'
-    permissions:
-      pull-requests: write
-      issues: write
-      discussions: write
+    permissions: write-all
+
     steps:
     - uses: actions/checkout@master
     
