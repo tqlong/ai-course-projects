@@ -30,7 +30,9 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    return None
+    total_price = [x.getPriceOfOrder(orderList) for x in fruitShops]
+    max_id = total_price.index(max(total_price))
+    return fruitShops[max_id]
 
 
 if __name__ == '__main__':
