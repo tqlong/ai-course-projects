@@ -30,7 +30,18 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    return None
+
+    nameShopSmart = ""
+    totalShopSmart = 100000000000000
+
+    for _shop in fruitShops:
+        name = _shop.getName()
+        total = _shop.getPriceOfOrder(orderList)
+        if total < totalShopSmart:
+            totalShopSmart = total
+            nameShopSmart = name
+
+    return shop.FruitShop(nameShopSmart, [totalShopSmart])
 
 
 if __name__ == '__main__':
