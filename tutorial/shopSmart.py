@@ -30,7 +30,7 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    return None
+    return min([(shop, shop.getPriceOfOrder(shop, orderList)) for shop in fruitShops], key = lambda x : x[1])[0];
 
 
 if __name__ == '__main__':
