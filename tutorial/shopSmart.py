@@ -29,8 +29,29 @@ def shopSmart(orderList, fruitShops):
         orderList: List of (fruit, numPound) tuples
         fruitShops: List of FruitShops
     """
-    "*** YOUR CODE HERE ***"
-    return None
+
+    ans = None
+    minCost = None
+
+    for fruitShop in fruitShops:
+        totalCost = 0.0
+        isValid = True
+
+        fruits = fruitShop.fruitPrices.keys()
+
+        for (fruit, numPounds) in orderList:
+            if fruit in fruits:
+                totalCost += fruitShop.fruitPrices.get(fruit) * numPounds
+            else:
+                print(fruit, " doesn't appear in fruitPrices")
+                isValid = False
+
+        if isValid:
+            if (ans is None) or (minCost > totalCost):
+                minCost = totalCost
+                ans = fruitShop
+
+    return ans
 
 
 if __name__ == '__main__':
