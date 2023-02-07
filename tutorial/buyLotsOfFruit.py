@@ -39,7 +39,8 @@ def buyLotsOfFruit(orderList):
     for fruit, numPounds in orderList:
         if fruit not in fruitPrices:
             return None
-        totalCost += orderList[fruit] * fruitPrices
+        totalCost += orderList[fruit]*fruitPrices
+    
     return totalCost
 
 
