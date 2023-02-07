@@ -36,6 +36,9 @@ def buyLotsOfFruit(orderList):
     """
     totalCost = 0.0
     "*** YOUR CODE HERE ***"
+    for tuple in orderList:
+        if tuple[0] in fruitPrices:
+            totalCost += fruitPrices[tuple[0]] * tuple[1]
     return totalCost
 
 

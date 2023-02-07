@@ -30,7 +30,13 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    return None
+    result = []
+    for fruitShop in fruitShops:
+        result.append(fruitShop.getPriceOfOrder(orderList))
+    result.sort()
+    for fruitShop in fruitShops:
+        if fruitShop.getPriceOfOrder(orderList) == result[0]:
+            return fruitShop
 
 
 if __name__ == '__main__':
