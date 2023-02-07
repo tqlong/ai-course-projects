@@ -36,6 +36,13 @@ def buyLotsOfFruit(orderList):
     """
     totalCost = 0.0
     "*** YOUR CODE HERE ***"
+    for item in orderList:
+        isExist = item[0] in fruitPrices
+        if isExist == False:
+            print("There is some fruit doesn't appear in fruitPrices. Please check your input.")
+            return None
+        else:
+            totalCost = totalCost + item[1] * fruitPrices[item[0]]
     return totalCost
 
 
@@ -43,4 +50,6 @@ def buyLotsOfFruit(orderList):
 if __name__ == '__main__':
     "This code runs when you invoke the script from the command line"
     orderList = [('apples', 2.0), ('pears', 3.0), ('limes', 4.0)]
+    # 
+    # orderList = [ ('apples', 1.25), ('pears',1.50), ('limes',1.75) ]
     print('Cost of', orderList, 'is', buyLotsOfFruit(orderList))
