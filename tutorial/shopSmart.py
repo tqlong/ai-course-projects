@@ -29,9 +29,15 @@ def shopSmart(orderList, fruitShops):
         orderList: List of (fruit, numPound) tuples
         fruitShops: List of FruitShops
     """
-    total_price = [x.getPriceOfOrder(orderList) for x in fruitShops]
-    min_id = total_price.index(min(total_price))
-    return fruitShops[min_id]
+    min_total_price = fruitShops[0].getPriceOfOrder(orderList)
+    shop_smart = fruitShops[0]
+
+    for fshop in fruitShops:
+        shop_price = fshop.fruitPrices(orderList)
+        if shop_price < min_total_price:
+            min_total_price = shop_price
+            shop_smart = fshop
+    return shop_smart
 
 
 if __name__ == '__main__':
