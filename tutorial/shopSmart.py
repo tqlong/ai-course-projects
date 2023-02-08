@@ -30,7 +30,14 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    return None
+    mappingPriceShop = {}
+    listPrices = []
+    for shop in fruitShops:
+        price = shop.getPriceOfOrder(orderList)
+        listPrices.append(price)
+        mappingPriceShop[price] = shop
+    listPrices.sort()
+    return mappingPriceShop[listPrices[0]]
 
 
 if __name__ == '__main__':
