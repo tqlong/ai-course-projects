@@ -11,5 +11,5 @@ jobs:
         uses: mheap/automatic-approve-action@v1
         with:
           token: ${{ secrets.PAT }}
-          workflows: "tutorial.yaml"
-          dangerous_files: "tutorial/autograder.py"
+          workflows: "tutorial.yaml,search.yaml"
+          dangerous_files: "tutorial/autograder.py,search/autograder.py"
