@@ -38,7 +38,7 @@ jobs:
           -X POST \
           -H "Content-Type: application/json" \
           -H "Authorization: token $GITHUB_TOKEN" \
-          --data "{ \"body\": \"$COMMENT\" }" \
+          --data "{ \"body\": \"P0-Tutorial $COMMENT\" }" \
           $URL
 
     - name: 'check error'
