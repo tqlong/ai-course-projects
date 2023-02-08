@@ -33,7 +33,7 @@ def shopSmart(orderList, fruitShops):
     shop_smart = fruitShops[0]
 
     for fshop in fruitShops:
-        shop_price = fshop.fruitPrices(orderList)
+        shop_price = fshop.getPriceOfOrder(orderList)
         if shop_price < min_total_price:
             min_total_price = shop_price
             shop_smart = fshop
