@@ -33,8 +33,8 @@ def shopSmart(orderList, fruitShops):
     minTotal = float('inf')
     minShop = None
     for shop in fruitShops:
-        if fruitShops.getPriceOfOrder(orderList) < minTotal:
-            minTotal = fruitShops.getPriceOfOrder(orderList)
+        if shop.getPriceOfOrder(orderList) < minTotal:
+            minTotal = shop.getPriceOfOrder(orderList)
             minShop = shop
     return minShop
 
