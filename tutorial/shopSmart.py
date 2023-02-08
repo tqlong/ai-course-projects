@@ -29,11 +29,11 @@ def shopSmart(orderList, fruitShops):
         orderList: List of (fruit, numPound) tuples
         fruitShops: List of FruitShops
     """
-    minTotal = float('inf')
+    TotalMin = float('inf')
     minShop = None
     for shop in fruitShops:
-        if shop.getPriceOfOrder(orderList) < minTotal:
-            minTotal = shop.getPriceOfOrder(orderList)
+        if shop.getPriceOfOrder(orderList) < TotalMin:
+            TotalMin = shop.getPriceOfOrder(orderList)
             minShop = shop
     return minShop
 
