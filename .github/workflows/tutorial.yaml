@@ -1,6 +1,6 @@
 name: P0-Tutorial
 on:
-  pull_request_target:
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -9,9 +9,7 @@ jobs:
     env:
       OS: ubuntu-20.04
       PYTHON: '3.6'
-    permissions:
-      contents: read
-      pull-requests: write
+    permissions: write-all
 
     steps:
     - uses: actions/checkout@master
@@ -24,22 +22,24 @@ jobs:
     - name: 'test tutorial'
       run: |
         cd tutorial
-        python autograder.py | python ../check_grade.py > /tmp/output
-        cat /tmp/output
+        python autograder.py | sed '/FAIL/w /tmp/output'
+        cd ..
+        echo score = $(echo 9-$(bash check_grade.sh) | bc) > score.txt # score
+        cat score.txt
 
-    - name: 'Add comment to PR'
+    - name: Add comment to PR
       env:
         URL: ${{ github.event.pull_request.comments_url }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        COMMENT=$(cat /tmp/output)
+        COMMENT=$(cat score.txt)
         echo $URL
         curl \
           -X POST \
           -H "Content-Type: application/json" \
-          -H "Authorization: token $GITHUB_TOKEN" \
-          --data "{ \"body\": \"P0-Tutorial $COMMENT\" }" \
+          -H "Authorization: token ${{ secrets.PAT }}" \
+          --data '{ "body": "$COMMENT" }' \
           $URL
 
     - name: 'check error'
-      run: python check_error.py < /tmp/output
+      run: bash check_error.sh
