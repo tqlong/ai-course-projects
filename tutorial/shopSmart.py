@@ -29,7 +29,6 @@ def shopSmart(orderList, fruitShops):
         orderList: List of (fruit, numPound) tuples
         fruitShops: List of FruitShops
     """
-    "*** YOUR CODE HERE ***"
     minTotal = float('inf')
     minShop = None
     for shop in fruitShops:
