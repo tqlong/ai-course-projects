@@ -1,4 +1,4 @@
-name: P0-Tutorial
+name: P1-Search
 on:
   pull_request_target:
     branches: [ main ]
@@ -21,9 +21,9 @@ jobs:
       with:
         python-version: 3.6
 
-    - name: 'test tutorial'
+    - name: 'test search'
       run: |
-        cd tutorial
+        cd search
         python autograder.py | python ../check_grade.py > /tmp/output
         cat /tmp/output
 
