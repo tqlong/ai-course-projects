@@ -1,4 +1,4 @@
-name: P0-Tutorial
+name: P1-Search
 on:
   pull_request:
     branches: [ main ]
@@ -21,9 +21,9 @@ jobs:
       with:
         python-version: 3.6
 
-    - name: 'test tutorial'
+    - name: 'test search'
       run: |
-        cd tutorial
+        cd search
         python autograder.py | python ../check_grade.py > /tmp/output
         cat /tmp/output
 
@@ -38,7 +38,7 @@ jobs:
           -X POST \
           -H "Content-Type: application/json" \
           -H "Authorization: token $GITHUB_TOKEN" \
-          --data "{ \"body\": \"P0-Tutorial $COMMENT\" }" \
+          --data "{ \"body\": \"P1-Search $COMMENT\" }" \
           $URL
 
     - name: 'check error'
