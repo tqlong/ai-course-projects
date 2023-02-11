@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+import heapq
 
 class SearchProblem:
     """
@@ -87,17 +88,58 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack = []
+    visited= set()
+    start=(problem.getStartState(),[])        
+    stack.append(start)
+    while stack:
+        node, path = stack.pop();
+        if node in visited:
+            continue
+        visited.add(node)                        
+        if problem.isGoalState(node):
+            return path
+        for neighbor, action in problem .getSuccessors(node):
+            stack.append(neighbor, path + [action])
+    return []
+    
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue=[]
+    visited= set()                                                     
+    start= problem.getStartState()                          
+    queue.append(start, [])
+    while queue:
+        node, path = queue.pop(0);
+        if node in visited:
+            continue
+        visited.add(node)
+        if problem.isGoalState(node):
+            return path
+        for neighbor, action in problem.getSuccessors(node):
+            queue.append(neighbor, path + [action])
+    return []
+    
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    heap = []
+    visted = set()
+    start = problem.getStartState()
+    heapq.heappush(heap, (0, start,[]))
+    while heap:
+        cost, node, path = heapq.headpop(heap)
+        if node in visted:
+            continue
+        visted.add(node)
+        if(problem.isGoalState(node)):
+            return path
+        for neighbor, action, action_cost in problem.getSuccessors(node):
+            heapq.headpush(heap, (cost + action_cost, neighbor, path + [action]))
+        return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +151,21 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    heap = []
+    visted = set()
+    start = problem.getStartState()
+    heapq.heappush(heap, (0, start,[]))
+    while heap:
+        cost, node, path = heapq.headpop(heap)
+        if node in visted:
+            continue
+        visted.add(node)
+        if(problem.isGoalState(node)):
+            return path
+        for neighbor, action, action_cost in problem.getSuccessors(node):
+            newCost = cost +  action_cost + heuristic(neighbor, problem)
+            heapq.headpush(heap, (newCost, neighbor, path + [action]))
+        return []
 
 
 # Abbreviations
