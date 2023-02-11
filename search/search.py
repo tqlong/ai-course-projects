@@ -61,6 +61,13 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
+class Node:
+    def __init__(self, value, prev, action, heigh = 0):
+        self.value = value
+        self.prev = prev
+        self.action = action
+        self.heigh = heigh
+
 
 def tinyMazeSearch(problem):
     """
@@ -87,17 +94,85 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    res = list()
+    check = set()
+    st = util.Stack()
+    st.push(Node(problem.getStartState(), None, None))
+
+    while st.isEmpty() is not True:
+        node = st.pop()
+
+        if problem.isGoalState(node.value) is True:
+            break
+            
+        if node.value not in check:
+            check.add(node.value)
+            for u in problem.getSuccessors(node.value):
+                st.push(Node(u[0], node, u[1]))
+
+    while node.action is not None:
+        res.append(node.action)
+        node = node.prev
+    
+    res.reverse()
+
+    return res
+    
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    check = set()
+    st = util.Queue()
+    st.push(Node(problem.getStartState(), None, None))
+
+    while st.isEmpty() is not True:
+        node = st.pop()
+
+        if problem.isGoalState(node.value) is True:
+            break
+            
+        if node.value not in check:
+            check.add(node.value)
+            for u in problem.getSuccessors(node.value):
+                st.push(Node(u[0], node, u[1]))
+
+    res = list()
+    while node.action is not None:
+        res.append(node.action)
+        node = node.prev
+    
+    res.reverse()
+
+    return res
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    check = set()
+    heap = util.PriorityQueue()
+    heap.push(Node(problem.getStartState(), None, None), 0)
+
+    while heap.isEmpty() is not True:
+        node = heap.pop()
+
+        if problem.isGoalState(node.value) is True:
+            break
+
+        if node.value not in check:
+            check.add(node.value)
+            for u in problem.getSuccessors(node.value):
+                heap.push(Node(u[0], node, u[1], u[2] + node.heigh), u[2] + node.heigh)
+
+    res = list()
+    while node.action is not None:
+        res.append(node.action)
+        node = node.prev
+    
+    res.reverse()
+
+    return res
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +184,29 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    check = set()
+    heap = util.PriorityQueue()
+    heap.push(Node(problem.getStartState(), None, None), 0)
+
+    while heap.isEmpty() is not True:
+        node = heap.pop()
+
+        if problem.isGoalState(node.value) is True:
+            break
+
+        if node.value not in check:
+            check.add(node.value)
+            for u in problem.getSuccessors(node.value):
+                heap.push(Node(u[0], node, u[1]), heuristic(u[0], problem))
+
+    res = list()
+    while node.action is not None:
+        res.append(node.action)
+        node = node.prev
+    
+    res.reverse()
+
+    return res
 
 
 # Abbreviations
