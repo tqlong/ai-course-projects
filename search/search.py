@@ -87,17 +87,119 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Declare
+    frontier = util.Stack()
+    visited = set()
+    parrentOf = dict()
+    goal_state = None
+    init_state = problem.getStartState()
+
+    # Init search
+    frontier.push(init_state)
+    visited.add(init_state)
+    parrentOf[init_state] = None
+
+
+    while not frontier.isEmpty():
+        parrent = frontier.pop()
+
+        if problem.isGoalState(parrent):
+            goal_state = parrent
+            break
+
+        visited.add(parrent)
+        for state, action, cost in problem.getSuccessors(parrent):
+            if state in visited:
+                continue
+            
+            parrentOf[state] = parrent, action, cost
+            frontier.push(state)
+    
+    # Trace the path
+    path = []
+    while parrentOf[goal_state] is not None:
+        goal_state, action, cost = parrentOf[goal_state]
+        path.append(action)
+
+    
+    return path[::-1]
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.Queue()
+    visited = set()
+    parrentOf = dict()
+    goal_state = None
+    init_state = problem.getStartState()
+
+    # Init search
+    frontier.push(init_state)
+    visited.add(init_state)
+    parrentOf[init_state] = None
+
+    while not frontier.isEmpty():
+        parrent = frontier.pop()
+
+        if problem.isGoalState(parrent):
+            goal_state = parrent
+            break
+
+        # visited.add(parrent)
+        for state, action, cost in problem.getSuccessors(parrent):
+            if state in visited:
+                continue
+            
+            visited.add(state)
+            parrentOf[state] = parrent, action, cost
+            frontier.push(state)
+    path = []
+
+    while parrentOf[goal_state] is not None:
+        goal_state, action, cost = parrentOf[goal_state]
+        path.append(action)
+
+    
+    return path[::-1]
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    frontier = util.PriorityQueue()
+    visited = set()
+    parrentOf = dict()
+    goal_state = None
+    init_state = problem.getStartState()
+    cost = dict()
+
+    # Init search
+    frontier.push(init_state, 0)
+    visited.add(init_state)
+    parrentOf[init_state] = None
+    cost[init_state] = 0
+
+    while not frontier.isEmpty():
+        parrent = frontier.pop()
+
+        if problem.isGoalState(parrent):
+            goal_state = parrent
+            break
+
+        for state, action, step_cost in problem.getSuccessors(parrent):
+            if state not in visited or cost[state] > cost[parrent] + step_cost:
+                visited.add(state)
+                cost[state] = step_cost + cost[parrent]
+                frontier.push(state, cost[state])
+                parrentOf[state] = parrent, action, cost
+            
+    path = []
+
+    while parrentOf[goal_state] is not None:
+        goal_state, action, cost = parrentOf[goal_state]
+        path.append(action)
+
+    
+    return path[::-1]
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +211,44 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def priorityFunction(state):
+        return cost[state] + heuristic(state, problem)
+
+    frontier = util.PriorityQueueWithFunction(priorityFunction)
+    visited = set()
+    parrentOf = dict()
+    goal_state = None
+    init_state = problem.getStartState()
+    cost = dict()
+
+    # Init search
+    parrentOf[init_state] = None
+    cost[init_state] = 0
+    frontier.push(init_state)
+    visited.add(init_state)
+
+    while not frontier.isEmpty():
+        parrent = frontier.pop()
+
+        if problem.isGoalState(parrent):
+            goal_state = parrent
+            break
+
+        for state, action, step_cost in problem.getSuccessors(parrent):
+            if state not in visited or cost[state] > cost[parrent] + step_cost:
+                visited.add(state)
+                cost[state] = step_cost + cost[parrent]
+                frontier.push(state)
+                parrentOf[state] = parrent, action, cost
+            
+    path = []
+
+    while parrentOf[goal_state] is not None:
+        goal_state, action, cost = parrentOf[goal_state]
+        path.append(action)
+
+    
+    return path[::-1]
 
 
 # Abbreviations
