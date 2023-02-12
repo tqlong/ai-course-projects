@@ -288,6 +288,8 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.visited = [corner for corner in self.corners if startingGameState.hasFood(*corner)]
+
 
     def getStartState(self):
         """
@@ -295,6 +297,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        return (self.startingPosition, ([corner for corner in self.visited]))
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -302,6 +305,9 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        if len(state[1]) == 0:
+            return True
+        return False
         util.raiseNotDefined()
 
     def getSuccessors(self, state):
@@ -323,6 +329,18 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
+                #check corner
+                left = state[1][:]
+                if (nextx,nexty) in state[1]:
+                    left.remove((nextx,nexty))
+                successors.append((((nextx,nexty), left),action,1))
+
+
 
             "*** YOUR CODE HERE ***"
 
@@ -356,8 +374,28 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
+    
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    #cornersHeuristic find the g(n) to target
+    curPos = state[0]
+    leftCorners = state[1][:]
+    heuristic = 0
+    
+    while leftCorners :
+        listDistance = []
+        for corner in leftCorners:
+            listDistance.append((util.manhattanDistance(curPos,corner),corner))
+        
+        min_, corner = min(listDistance)
+        heuristic += min_
+        curPos = corner
+        leftCorners.remove(corner)
+    
+    return heuristic
+
+
+
 
     "*** YOUR CODE HERE ***"
     return 0 # Default to trivial solution
@@ -454,6 +492,20 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    remainingFood = foodGrid.asList()
+
+    if len(remainingFood) == 0:
+        return 0
+    distanceList = []
+
+    for food in remainingFood:
+        #append to the distance list the manhattan distance
+        distanceList.append(mazeDistance(position, food,problem.startingGameState))
+
+    #find the maximum distance food pellet and return it
+    mDistance = max(distanceList)
+
+    return mDistance # Default to trivial solution
     return 0
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -485,6 +537,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.breadthFirstSearch(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -519,6 +572,9 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        listOfFood = self.food.asList()
+        return (x,y) in listOfFood
+
 
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
