@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -68,9 +69,11 @@ def tinyMazeSearch(problem):
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
     from game import Directions
+
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -87,17 +90,68 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Stack
+
+    stack = Stack()
+    if problem.isGoalState(problem.getStartState()):
+        return []
+    stack.push((problem.getStartState(), []))
+    visited = []
+    while not stack.isEmpty():
+        node, path = stack.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for successor, action in problem.getSuccessors(node):
+                stack.push((successor, path + [action]))
+    return []
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+
+    queue = Queue()
+    if problem.isGoalState(problem.getStartState()):
+        return []
+    queue.push((problem.getStartState(), []))
+    visited = []
+    while not queue.isEmpty():
+        node, path = queue.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for successor, action in problem.getSuccessors(node):
+                queue.push((successor, path + [action]))
+    return []
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    queue = PriorityQueue()
+    if problem.isGoalState(problem.getStartState()):
+        return []
+    queue.push((problem.getStartState(), []), 0)
+    visited = []
+    while not queue.isEmpty():
+        node, path = queue.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for successor, action in problem.getSuccessors(node):
+                queue.push(
+                    (successor, path + [action]),
+                    problem.getCostOfActions(path + [action]),
+                )
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +160,30 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    queue = PriorityQueue()
+    if problem.isGoalState(problem.getStartState()):
+        return []
+    queue.push((problem.getStartState(), []), 0)
+    visited = []
+    while not queue.isEmpty():
+        node, path = queue.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for successor, action in problem.getSuccessors(node):
+                queue.push(
+                    (successor, path + [action]),
+                    problem.getCostOfActions(path + [action])
+                    + heuristic(successor, problem),
+                )
+    return []
 
 
 # Abbreviations
