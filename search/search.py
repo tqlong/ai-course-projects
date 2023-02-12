@@ -72,6 +72,21 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def generic_search(problem, data_structure, push_function):
+    closed_set = set()
+    push_function(problem.getStartState(), [], 0)
+
+    while not data_structure.isEmpty():
+        path = data_structure.pop()
+
+        if problem.isGoalState(path[0]):
+            return path[1]
+
+        if path[0] not in closed_set:
+            closed_set.add(path[0])
+            for successor, action, step_cost in problem.getSuccessors(path[0]):
+                push_function(successor, path[1] + [action], path[2] + step_cost)
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,17 +102,23 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    st = util.Stack()
+    return generic_search(problem, st,
+        lambda state, actions, _: st.push((state, actions, 0)))
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    qu = util.Queue()
+    return generic_search(problem, qu,
+        lambda state, actions, _: qu.push((state, actions, 0)))
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pq = util.PriorityQueue()
+    return generic_search(problem, pq,
+        lambda state, actions, cost: pq.push((state, actions, cost), cost))
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +130,10 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pq = util.PriorityQueue()
+    return generic_search(problem, pq,
+        lambda state, actions, cost: pq.push((state, actions, cost),
+            cost + heuristic(state, problem)))
 
 
 # Abbreviations
