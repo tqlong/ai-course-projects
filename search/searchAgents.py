@@ -490,26 +490,23 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    def mahartan_dist(point1, point2):
-        x, y = point1
-        d_x, d_y = point2
-
-        return abs(x - d_x) + abs(y - d_y)
-
     if foodGrid.count() == 0:
         return 0
 
-    allFood = sorted(foodGrid.asList(), key = lambda food_pos: -mahartan_dist(position, food_pos))
-    
-    # problem = PositionSearchProblem(
-    #     gameState=problem.startingGameState,
-    #     start=position,
-    #     goal=allFood[0],
-    #     warn=False,
-    #     visualize=False
-    # )
+    farestFood = 0
 
-    return mahartan_dist(position, allFood[0])
+    for food in foodGrid.asList():
+        sub_problem = PositionSearchProblem(
+            gameState=problem.startingGameState,
+            start=position,
+            goal=food,
+            warn=False,
+            visualize=False
+        )
+
+        farestFood = max(farestFood, len(search.bfs(sub_problem)))
+
+    return farestFood
 
 
 class ClosestDotSearchAgent(SearchAgent):
