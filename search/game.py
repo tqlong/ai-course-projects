@@ -176,7 +176,12 @@ class Grid:
         self.data = [[initialValue for y in range(height)] for x in range(width)]
         if bitRepresentation:
             self._unpackBits(bitRepresentation)
-
+    def __lt__(self, other):
+        for i in range(self.width):
+         for j in range(self.height):
+            if self.data[i][j] != other.data[i][j]:
+                return self.data[i][j] < other.data[i][j]
+        return False
     def __getitem__(self, i):
         return self.data[i]
 

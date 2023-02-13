@@ -295,7 +295,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return (self.startingPosition,[])
+        return ((self.startingPosition,[]))
 
     def isGoalState(self, state):
         """
@@ -332,10 +332,11 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
+                nextPos = (nextx, nexty)
                 nextVisitedCorners = list(visitedCorners)
-                if (nextx, nexty) in self.corners and (nextx, nexty) not in visitedCorners:
-                    nextVisitedCorners.append((nextx, nexty))
-                successors.append((((nextx, nexty), nextVisitedCorners), action, 1))
+                if nextPos in self.corners and nextPos not in visitedCorners:
+                    nextVisitedCorners.append(nextPos)
+                successors.append(((nextPos, nextVisitedCorners), action, 1))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -370,13 +371,17 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    def manhattan_distance(xy1, xy2):
+        x1, y1 = xy1
+        x2, y2 = xy2
+        return abs( x1 - x2 ) + abs( y1 - y2 )
     heuristic = 0
     for corner in corners:
-        x, y = corner
-        distance = manhattanHeuristic(state, (x, y))
-        heuristic = max(heuristic, distance)
-    
+        if corner not in state:
+            distance = manhattan_distance(state[0], corner)
+            heuristic = max(heuristic, distance)
     return heuristic
+    
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -470,13 +475,17 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    foodList= foodGrid.asList()
-    if(len(foodList) == 0):
+    foodList = foodGrid.asList()
+    if not foodList:
         return 0
-    manhattan = []
-    for food in foodList:
-        manhattan.append(util.manhattanDistance(position, food))
-    return max(manhattan)
+
+    distances = [manhattanDistance(position, food) for food in foodList]
+    return max(distances)
+
+def manhattanDistance(point1, point2):
+    x1, y1 = point1
+    x2, y2 = point2
+    return abs(x1 - x2) + abs(y1 - y2)
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -508,7 +517,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        return search.aStar(problem)     
+        return search.bfs(problem)     
         
 
 class AnyFoodSearchProblem(PositionSearchProblem):

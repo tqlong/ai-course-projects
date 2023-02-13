@@ -99,8 +99,8 @@ def depthFirstSearch(problem):
         visited.add(node)                        
         if problem.isGoalState(node):
             return path
-        for neighbor, action in problem .getSuccessors(node):
-            stack.append(neighbor, path + [action])
+        for neighbor, action, cost in problem .getSuccessors(node):
+            stack.append((neighbor, path + [action]))
     return []
     
 
@@ -108,38 +108,38 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     queue=[]
-    visited= set()                                                     
+    visited=[]                                                    
     start= problem.getStartState()                          
-    queue.append(start, [])
+    queue.append((start, []))
     while queue:
         node, path = queue.pop(0);
         if node in visited:
             continue
-        visited.add(node)
+        visited.append(node)
         if problem.isGoalState(node):
             return path
-        for neighbor, action in problem.getSuccessors(node):
-            queue.append(neighbor, path + [action])
+        for neighbor, action, step_cost in problem.getSuccessors(node):
+            queue.append((neighbor, path + [action]))
     return []
     
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    heap = []
-    visted = set()
-    start = problem.getStartState()
-    heapq.heappush(heap, (0, start,[]))
-    while heap:
-        cost, node, path = heapq.headpop(heap)
-        if node in visted:
-            continue
-        visted.add(node)
-        if(problem.isGoalState(node)):
-            return path
-        for neighbor, action, action_cost in problem.getSuccessors(node):
-            heapq.headpush(heap, (cost + action_cost, neighbor, path + [action]))
-        return []
+    frontier = [(0, problem.getStartState(), [])]
+    visited = set()
+    
+    while frontier:
+        cost, state, actions = heapq.heappop(frontier)
+        if problem.isGoalState(state):
+            return actions
+        
+        if state not in visited:
+            visited.add(state)
+            for successor, action, stepCost in problem.getSuccessors(state):
+                heapq.heappush(frontier, (cost + stepCost, successor, actions + [action]))
+                
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -151,21 +151,20 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    heap = []
-    visted = set()
     start = problem.getStartState()
-    heapq.heappush(heap, (0, start,[]))
-    while heap:
-        cost, node, path = heapq.headpop(heap)
-        if node in visted:
+    frontier = [(0, start, [])]
+    visited = []
+    while frontier:
+        cost, state, actions = heapq.heappop(frontier)
+        if problem.isGoalState(state):
+            return actions
+        if state in visited:
             continue
-        visted.add(node)
-        if(problem.isGoalState(node)):
-            return path
-        for neighbor, action, action_cost in problem.getSuccessors(node):
-            newCost = cost +  action_cost + heuristic(neighbor, problem)
-            heapq.headpush(heap, (newCost, neighbor, path + [action]))
-        return []
+        visited.append(state)
+        for neighbor, action, stepCost in problem.getSuccessors(state):
+            newCost = cost + stepCost + heuristic(neighbor, problem)
+            heapq.heappush(frontier, (newCost, neighbor, actions + [action]))
+    return []
 
 
 # Abbreviations
