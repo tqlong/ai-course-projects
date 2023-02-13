@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -70,7 +71,27 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
+
+def noCostSearch(problem, fringe):
+    if (problem.isGoalState(problem.getStartState())):
+        return []
+    else:
+        fringe.push((problem.getStartState(), []))
+
+    visited = []
+    while not fringe.isEmpty():
+        node, path = fringe.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for successor in problem.getSuccessors(node):
+                fringe.push((successor[0], path + [successor[1]]))
+
+    return []
+
 
 def depthFirstSearch(problem):
     """
@@ -86,18 +107,39 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    return noCostSearch(problem, util.Stack())
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
-def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return noCostSearch(problem, util.Queue())
+
+
+def costlySearch(problem, heuristic):
+    priorityQueue = util.PriorityQueue()
+
+    if (problem.isGoalState(problem.getStartState())):
+        return []
+    else:
+        priorityQueue.push((problem.getStartState(), []), 0)
+
+    visited = []
+    while not priorityQueue.isEmpty():
+        node, path = priorityQueue.pop()
+        if node not in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for successor in problem.getSuccessors(node):
+                cost = problem.getCostOfActions(
+                    path + [successor[1]]) + heuristic(successor[0], problem)
+                priorityQueue.push(
+                    (successor[0], path + [successor[1]]), cost)
+
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +148,17 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
+def uniformCostSearch(problem):
+    """Search the node of least total cost first."""
+
+    return costlySearch(problem, nullHeuristic)
+
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    return costlySearch(problem, heuristic)
 
 
 # Abbreviations
