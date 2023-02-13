@@ -87,40 +87,43 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
+
     "*** YOUR CODE HERE ***"
-    stack = []
-    visited= set()
-    start=(problem.getStartState(),[])        
-    stack.append(start)
-    while stack:
-        node, path = stack.pop();
+    from util import Stack
+    stack = Stack()
+    visited = []
+    start = (problem.getStartState(),[])
+    stack.push(start)
+    while not stack.isEmpty():
+        node, path = stack.pop()
         if node in visited:
             continue
-        visited.add(node)                        
+        visited.append(node)
         if problem.isGoalState(node):
             return path
-        for neighbor, action, cost in problem .getSuccessors(node):
-            stack.append((neighbor, path + [action]))
+        for neighbor, action, cost in problem.getSuccessors(node):
+            stack.push((neighbor, path + [action]))
     return []
     
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    queue=[]
-    visited=[]                                                    
-    start= problem.getStartState()                          
-    queue.append((start, []))
+    from util import Queue
+    queue = Queue()
+    visited = []
+    start = problem.getStartState()
+    queue.push((start, []))
     while queue:
-        node, path = queue.pop(0);
+        node, path = queue.pop()
         if node in visited:
             continue
         visited.append(node)
         if problem.isGoalState(node):
             return path
-        for neighbor, action, step_cost in problem.getSuccessors(node):
-            queue.append((neighbor, path + [action]))
-    return []
+        for neighbor, action, cost in problem.getSuccessors(node):
+            queue.push((neighbor, path + [action]))
+    return [] 
     
 
 def uniformCostSearch(problem):

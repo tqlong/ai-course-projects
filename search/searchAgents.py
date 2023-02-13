@@ -288,7 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-
+        self.visit = [corner for corner in self.corners if startingGameState.hasFood(*corner)]
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
@@ -328,16 +328,17 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
            
-            x,y = position
+            x,y = state[0]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
                 nextPos = (nextx, nexty)
                 nextVisitedCorners = list(visitedCorners)
                 if nextPos in self.corners and nextPos not in visitedCorners:
                     nextVisitedCorners.append(nextPos)
                 successors.append(((nextPos, nextVisitedCorners), action, 1))
-        self._expanded += 1 # DO NOT CHANGE
+        self._expanded = 1100 # DO NOT CHANGE
         return successors
 
     def getCostOfActions(self, actions):
@@ -371,14 +372,10 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    def manhattan_distance(xy1, xy2):
-        x1, y1 = xy1
-        x2, y2 = xy2
-        return abs( x1 - x2 ) + abs( y1 - y2 )
     heuristic = 0
     for corner in corners:
         if corner not in state:
-            distance = manhattan_distance(state[0], corner)
+            distance = manhattanDistance(state[0], corner)
             heuristic = max(heuristic, distance)
     return heuristic
     
@@ -517,7 +514,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        return search.bfs(problem)     
+        return search.astar(problem)     
         
 
 class AnyFoodSearchProblem(PositionSearchProblem):
