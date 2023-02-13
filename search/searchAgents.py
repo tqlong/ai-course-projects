@@ -288,7 +288,6 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.gameState = startingGameState
 
     def getStartState(self):
         """
@@ -303,7 +302,7 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        for t in state[1:]:
+        for t in state[1]:
             if t is False: return False
         return True
 
@@ -333,12 +332,16 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
 
-            if hitsWall is True: continue
+            if not hitsWall:
+                list_visited = []
+                for i in range(0,4):
+                    if (nextx, nexty) == self.corners[i]:
+                        list_visited.append(True)
+                    else:
+                        list_visited.append(state[1][i])
 
-            left = state[1:]
-            if((nextx, nexty) in left):
-                left.remove((nextx, nexty))
-            successors.append((((nextx, nexty), left), action, 1))
+                new_corners_visited = (list_visited[0],list_visited[1],list_visited[2],list_visited[3])
+                successors.append((((nextx,nexty),new_corners_visited),action,1))
             
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -374,13 +377,14 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    h = 0
 
-    heuristic = 0
     for i in range(4):
-        if state[1][i] is False:
-            heuristic = min(heuristic, util.manhattanHeuristic(state[0], corners[i]))
-
-    return heuristic # Default to trivial solution
+        if (not state[1][i]):
+            _h = util.manhattanDistance(state[0], corners[i])        
+            if (h < _h):
+                h = _h     
+    return h # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -486,10 +490,10 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
 
-    heuristic = 999999999
-    for i in range(foodGrid.height):
-        for j in range(foodGrid.width):
-            heuristic = min(heuristic, mazeDistance(position, foodGrid[i][j], problem.startingGameState))
+    heuristic = 0
+    array = foodGrid.asList();
+    for item in array:
+            heuristic = max(heuristic, mazeDistance(position, item, problem.startingGameState))
 
     return heuristic
 
