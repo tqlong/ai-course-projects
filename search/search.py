@@ -126,9 +126,7 @@ def breadthFirstSearch(problem):
             return path
         if node not in visited:
             visited.append(node)
-            if problem.isGoalState(node):
-                return path
-            for successor, action in problem.getSuccessors(node):
+            for successor, action, _ in problem.getSuccessors(node):
                 queue.push((successor, path + [action]))
     return []
 
@@ -149,8 +147,6 @@ def uniformCostSearch(problem):
             return path
         if node not in visited:
             visited.append(node)
-            if problem.isGoalState(node):
-                return path
             for successor, action, ncost in problem.getSuccessors(node):
                 queue.update(
                     (successor, path + [action], ncost + cost), ncost + cost,
