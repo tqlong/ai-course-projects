@@ -61,14 +61,6 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-class Node:
-    def __init__(self, value, prev, action, heigh = 0):
-        self.value = value
-        self.prev = prev
-        self.action = action
-        self.heigh = heigh
-
-
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -95,29 +87,22 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     
-    res = list()
     check = set()
     st = util.Stack()
-    st.push(Node(problem.getStartState(), None, None))
+    st.push((problem.getStartState(), []))
 
-    while st.isEmpty() is not True:
-        node = st.pop()
+    while st.isEmpty() is False:
+        u, res = st.pop()
 
-        if problem.isGoalState(node.value) is True:
-            break
+        if problem.isGoalState(u) is True:
+            return res
             
-        if node.value not in check:
-            check.add(node.value)
-            for u in problem.getSuccessors(node.value):
-                st.push(Node(u[0], node, u[1]))
+        if u not in check:
+            check.add(u)
+            for v, action, _ in problem.getSuccessors(u):
+                st.push((v, res + [action]))
 
-    while node.action is not None:
-        res.append(node.action)
-        node = node.prev
-    
-    res.reverse()
-
-    return res
+    return []
     
 
 def breadthFirstSearch(problem):
@@ -125,54 +110,40 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     check = set()
     st = util.Queue()
-    st.push(Node(problem.getStartState(), None, None))
+    st.push((problem.getStartState(), []))
 
-    while st.isEmpty() is not True:
-        node = st.pop()
+    while st.isEmpty() is False:
+        u, res = st.pop()
 
-        if problem.isGoalState(node.value) is True:
-            break
+        if problem.isGoalState(u) is True:
+            return res
             
-        if node.value not in check:
-            check.add(node.value)
-            for u in problem.getSuccessors(node.value):
-                st.push(Node(u[0], node, u[1]))
+        if u not in check:
+            check.add(u)
+            for v, action, _ in problem.getSuccessors(u):
+                st.push((v, res + [action]))
 
-    res = list()
-    while node.action is not None:
-        res.append(node.action)
-        node = node.prev
-    
-    res.reverse()
-
-    return res
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     check = set()
-    heap = util.PriorityQueue()
-    heap.push(Node(problem.getStartState(), None, None), 0)
+    st = util.PriorityQueue()
+    st.push((problem.getStartState(), [], 0), 0)
 
-    while heap.isEmpty() is not True:
-        node = heap.pop()
+    while st.isEmpty() is False:
+        u, res, heigh = st.pop()
 
-        if problem.isGoalState(node.value) is True:
-            break
+        if problem.isGoalState(u) is True:
+            return res
+            
+        if u not in check:
+            check.add(u)
+            for v, action, cost in problem.getSuccessors(u):
+                st.push((v, res + [action], cost + heigh), cost + heigh)
 
-        if node.value not in check:
-            check.add(node.value)
-            for u in problem.getSuccessors(node.value):
-                heap.push(Node(u[0], node, u[1], u[2] + node.heigh), u[2] + node.heigh)
-
-    res = list()
-    while node.action is not None:
-        res.append(node.action)
-        node = node.prev
-    
-    res.reverse()
-
-    return res
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -185,28 +156,21 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     check = set()
-    heap = util.PriorityQueue()
-    heap.push(Node(problem.getStartState(), None, None), 0)
+    st = util.PriorityQueue()
+    st.push((problem.getStartState(), [], 0), 0)
 
-    while heap.isEmpty() is not True:
-        node = heap.pop()
+    while st.isEmpty() is False:
+        u, res, heigh = st.pop()
 
-        if problem.isGoalState(node.value) is True:
-            break
+        if problem.isGoalState(u) is True:
+            return res
+            
+        if u not in check:
+            check.add(u)
+            for v, action, cost in problem.getSuccessors(u):
+                st.push((v, res + [action], cost + heigh), cost + heigh + heuristic(v, problem))
 
-        if node.value not in check:
-            check.add(node.value)
-            for u in problem.getSuccessors(node.value):
-                heap.push(Node(u[0], node, u[1]), heuristic(u[0], problem))
-
-    res = list()
-    while node.action is not None:
-        res.append(node.action)
-        node = node.prev
-    
-    res.reverse()
-
-    return res
+    return []
 
 
 # Abbreviations

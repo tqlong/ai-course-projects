@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.gameState = startingGameState
 
     def getStartState(self):
         """
@@ -295,7 +296,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        ret = (self.startingPosition, False, False, False, False) 
+        ret = (self.startingPosition, (False, False, False, False)) 
         return ret
 
     def isGoalState(self, state):
@@ -334,12 +335,10 @@ class CornersProblem(search.SearchProblem):
 
             if hitsWall is True: continue
 
-            boolean = []
-            for i in range(len(self.corners)):
-                value = ((nextx, nexty)==self.corners[i]) | state[i+1]
-                boolean.append(value)
-            state_next = ((nextx, nexty), boolean[0], boolean[1],boolean[2], boolean[3])
-            successors.append((state_next, action, 1))
+            left = state[1:]
+            if((nextx, nexty) in left):
+                left.remove((nextx, nexty))
+            successors.append((((nextx, nexty), left), action, 1))
             
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -376,10 +375,10 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
 
-    heuristic = 999999
-    for i in range(len(corners)):
-        heuristic = heuristic if state[i+1] is False else \
-            min(heuristic, util.manhattanDistance((state[0][0], state[0][1]), (corners[i][0], corners[i][1])))
+    heuristic = 0
+    for i in range(4):
+        if state[1][i] is False:
+            heuristic = min(heuristic, util.manhattanHeuristic(state[0], corners[i]))
 
     return heuristic # Default to trivial solution
 
@@ -490,8 +489,7 @@ def foodHeuristic(state, problem):
     heuristic = 999999999
     for i in range(foodGrid.height):
         for j in range(foodGrid.width):
-            if foodGrid[i][j] is False: continue
-            heuristic = min(heuristic, mazeDistance((j, i), position, GameState(state, problem.walls)))
+            heuristic = min(heuristic, mazeDistance(position, foodGrid[i][j], problem.startingGameState))
 
     return heuristic
 
@@ -524,15 +522,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        res = []
-        for i in range(food.width):
-            for j in range(food.height):
-                if food[i][j]:
-                    path = search.bfs(problem)
-                    if len(path) < len(res):
-                        res = path
-
-        return res
+        return search.aStarSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
