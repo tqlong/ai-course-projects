@@ -34,6 +34,7 @@ description for details.
 Good luck and happy searching!
 """
 
+from tabnanny import check
 from game import Directions
 from game import Agent
 from game import Actions
@@ -336,7 +337,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.startState = (self.startingPosition, (False, False, False, False))
+        self.gameState = startingGameState
 
     def getStartState(self):
         """
@@ -344,14 +345,17 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startState
+        return (self.startingPosition, (False, False, False, False))
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        return state[1] == (True, True, True, True)
+        for i in range(0, 4):
+            if state[1][i] == False:
+                return False
+        return True
 
     def getSuccessors(self, state):
         """
@@ -382,14 +386,16 @@ class CornersProblem(search.SearchProblem):
             x, y = state[0]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
-            hitsWall = self.walls[nextx][nexty]
-            if not hitsWall:
-                nextPosition = (nextx, nexty)
-                nextCorners = list(state[1])
-                if nextPosition in self.corners:
-                    nextCorners[self.corners.index(nextPosition)] = True
-                nextState = (nextPosition, tuple(nextCorners))
-                successors.append((nextState, action, 1))
+            check = []
+            for i, corner in enumerate(self.corners):
+                if (nextx == corner[0]) and (nexty == corner[1]):
+                    check.append(True)
+                elif state[1][i]:
+                    check.append(True)
+                else:
+                    check.append(False)
+            if not self.walls[nextx][nexty]:
+                successors.append((((nextx, nexty), check), action, 1))
 
         self._expanded += 1  # DO NOT CHANGE
         return successors
@@ -428,20 +434,14 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     from util import manhattanDistance
-    if problem.isGoalState(state):
-        return 0
-    else:
-        unvisitedCorners = [
-            corner for corner, visited in zip(corners, state[1]) if not visited
-        ]
-        return sum(
-            min(
-                manhattanDistance(corner, unvisitedCorner)
-                for unvisitedCorner in unvisitedCorners
-            )
-            for corner in unvisitedCorners
-        )
-    return 0  # Default to trivial solution
+
+    heuristic = 0
+    for i in range(0, 4):
+        if not state[1][i]:
+            temp = manhattanDistance(state[0], corners[i])
+            if temp > heuristic:
+                heuristic = temp
+    return heuristic
 
 
 class AStarCornersAgent(SearchAgent):
@@ -550,19 +550,13 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    from util import manhattanDistance
+    heuristic = 0
     foodGrid = foodGrid.asList()
-    if len(foodGrid) == 0:
-        return 0
-    else:
-        return max(
-            [
-                manhattanDistance(position, food)
-                for food in foodGrid
-                if food != position
-            ]
-        )
-    return 0
+    for food in foodGrid:
+        temp = mazeDistance(position, food, problem.startingGameState)
+        if temp > heuristic:
+            heuristic = temp
+    return heuristic
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -599,7 +593,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        return search.bfs(problem)
+        return search.aStarSearch(problem)
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):

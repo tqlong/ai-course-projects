@@ -96,14 +96,16 @@ def depthFirstSearch(problem):
     if problem.isGoalState(problem.getStartState()):
         return []
     stack.push((problem.getStartState(), []))
-    visited = []
+    visited = list()
     while not stack.isEmpty():
         node, path = stack.pop()
+        if problem.isGoalState(node):
+            return path
         if node not in visited:
             visited.append(node)
             if problem.isGoalState(node):
                 return path
-            for successor, action in problem.getSuccessors(node):
+            for successor, action, _ in problem.getSuccessors(node):
                 stack.push((successor, path + [action]))
     return []
 
@@ -114,12 +116,14 @@ def breadthFirstSearch(problem):
     from util import Queue
 
     queue = Queue()
+    visited = list()
     if problem.isGoalState(problem.getStartState()):
         return []
     queue.push((problem.getStartState(), []))
-    visited = []
     while not queue.isEmpty():
         node, path = queue.pop()
+        if problem.isGoalState(node):
+            return path
         if node not in visited:
             visited.append(node)
             if problem.isGoalState(node):
@@ -137,18 +141,19 @@ def uniformCostSearch(problem):
     queue = PriorityQueue()
     if problem.isGoalState(problem.getStartState()):
         return []
-    queue.push((problem.getStartState(), []), 0)
-    visited = []
+    queue.push((problem.getStartState(), [], 0), 0)
+    visited = list()
     while not queue.isEmpty():
-        node, path = queue.pop()
+        node, path, cost = queue.pop()
+        if problem.isGoalState(node):
+            return path
         if node not in visited:
             visited.append(node)
             if problem.isGoalState(node):
                 return path
-            for successor, action in problem.getSuccessors(node):
-                queue.push(
-                    (successor, path + [action]),
-                    problem.getCostOfActions(path + [action]),
+            for successor, action, ncost in problem.getSuccessors(node):
+                queue.update(
+                    (successor, path + [action], ncost + cost), ncost + cost,
                 )
     return []
 
@@ -169,19 +174,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     queue = PriorityQueue()
     if problem.isGoalState(problem.getStartState()):
         return []
-    queue.push((problem.getStartState(), []), 0)
-    visited = []
+    queue.push((problem.getStartState(), [], 0), heuristic)
+    visited = list()
     while not queue.isEmpty():
-        node, path = queue.pop()
+        node, path, cost = queue.pop()
+        if problem.isGoalState(node):
+            return path
         if node not in visited:
             visited.append(node)
             if problem.isGoalState(node):
                 return path
-            for successor, action in problem.getSuccessors(node):
-                queue.push(
-                    (successor, path + [action]),
-                    problem.getCostOfActions(path + [action])
-                    + heuristic(successor, problem),
+            for successor, action, ncost in problem.getSuccessors(node):
+                queue.update(
+                    (successor, path + [action], ncost + cost),
+                    ncost + cost + heuristic(successor, problem),
                 )
     return []
 
