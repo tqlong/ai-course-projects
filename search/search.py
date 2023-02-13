@@ -96,13 +96,12 @@ def depthFirstSearch(problem):
     stack.push(start)
     while not stack.isEmpty():
         node, path = stack.pop()
-        if node in visited:
-            continue
-        visited.append(node)
-        if problem.isGoalState(node):
-            return path
-        for neighbor, action, cost in problem.getSuccessors(node):
-            stack.push((neighbor, path + [action]))
+        if not node in visited:
+            visited.append(node)
+            if problem.isGoalState(node):
+                return path
+            for neighbor, action, cost in problem.getSuccessors(node):
+                stack.push((neighbor, path + [action]))
     return []
     
 
@@ -154,19 +153,20 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    visited = set()
     start = problem.getStartState()
-    frontier = [(0, start, [])]
-    visited = []
-    while frontier:
-        cost, state, actions = heapq.heappop(frontier)
-        if problem.isGoalState(state):
-            return actions
-        if state in visited:
-            continue
-        visited.append(state)
-        for neighbor, action, stepCost in problem.getSuccessors(state):
-            newCost = cost + stepCost + heuristic(neighbor, problem)
-            heapq.heappush(frontier, (newCost, neighbor, actions + [action]))
+    queue = util.PriorityQueue()
+    queue.push((start, [], 0), 0)
+
+    while not queue.isEmpty():
+        node, path, cost = queue.pop()
+        if not node in visited:
+            visited.add(node)
+            if problem.isGoalState(node) :
+                return path
+            for neighbor, action, step_cost in problem.getSuccessors(node):
+                hCost = heuristic(neighbor, problem)
+                queue.push((neighbor, path + [action], cost + step_cost), cost + step_cost + hCost)
     return []
 
 
