@@ -30,16 +30,8 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    bestShop = fruitShops[0]		
-    leastAmount = bestShop.getPriceOfOrder(orderList)
+    return None
 
-    for shop in fruitShops:
-        tmp = shop.getPriceOfOrder(orderList)
-        if tmp < leastAmount:
-            bestShop = shop
-            leastAmount = tmp
-
-    return bestShop
 
 if __name__ == '__main__':
     "This code runs when you invoke the script from the command line"
