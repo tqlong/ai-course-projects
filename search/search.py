@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -86,18 +88,108 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Stack
+
+    if problem.isGoalState(problem.getStartState()):
+        return None
+
+    stack = Stack()
+    pre = {}
+    visited = []
+    stack.push(problem.getStartState())
+    goal = None
+    while not stack.isEmpty():
+        u = stack.pop()
+        if problem.isGoalState(u):
+            goal = u
+            break
+        if u not in visited:
+            visited.append(u)
+            for v in problem.getSuccessors(u):
+                if v[0] not in visited:
+                    pre[v[0]] = (u, v[1])
+                    stack.push(v[0])
+
+    ans = []
+    while goal != problem.getStartState():
+        ans.append(pre[goal][1])
+        goal = pre[goal][0]
+
+    ans.reverse()
+    return ans
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import Queue
+
+    if problem.isGoalState(problem.getStartState()):
+        return None
+
+    queue = Queue()
+    pre = {}
+    visited = []
+    queue.push(problem.getStartState())
+    goal = None
+    while not queue.isEmpty():
+        u = queue.pop()
+        visited.append(u)
+        if problem.isGoalState(u):
+            goal = u
+            break
+        for v in problem.getSuccessors(u):
+            if v[0] not in visited:
+                pre[v[0]] = (u, v[1])
+                queue.push(v[0])
+                visited.append(v[0])
+
+    ans = []
+    while goal != problem.getStartState():
+        ans.append(pre[goal][1])
+        goal = pre[goal][0]
+
+    ans.reverse()
+    return ans
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    if problem.isGoalState(problem.getStartState()):
+        return None
+
+    pre = {}
+    pq = PriorityQueue()
+    goal = None
+    visited = []
+    dist = {problem.getStartState(): 0}
+    pq.push(problem.getStartState(), 0)
+    while not pq.isEmpty():
+        u = pq.pop()
+        if problem.isGoalState(u):
+            goal = u
+            break
+        visited.append(u)
+        for v in problem.getSuccessors(u):
+            if v[0] not in visited:
+                visited.append(v[0])
+                dist[v[0]] = v[2] + dist[u]
+                pq.push(v[0], dist[v[0]])
+                pre[v[0]] = (u, v[1])
+            elif v[2] + dist[u] < dist[v[0]]:
+                dist[v[0]] = v[2] + dist[u]
+                pq.update(v[0], dist[v[0]])
+                pre[v[0]] = (u, v[1])
+
+    ans = []
+    while goal != problem.getStartState():
+        ans.append(pre[goal][1])
+        goal = pre[goal][0]
+
+    ans.reverse()
+    return ans
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +198,45 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import PriorityQueue
+
+    if problem.isGoalState(problem.getStartState()):
+        return None
+
+    pre = {}
+    pq = PriorityQueue()
+    goal = None
+    visited = []
+    dist = {problem.getStartState(): heuristic(problem.getStartState(), problem)}
+    pq.push(problem.getStartState(), heuristic(problem.getStartState(), problem))
+    while not pq.isEmpty():
+        u = pq.pop()
+        if problem.isGoalState(u):
+            goal = u
+            break
+        visited.append(u)
+        for v in problem.getSuccessors(u):
+            hn = heuristic(v[0], problem)
+            if v[0] not in visited:
+                visited.append(v[0])
+                dist[v[0]] = v[2] + dist[u]
+                pq.push(v[0], dist[v[0]] + hn)
+                pre[v[0]] = (u, v[1])
+            elif v[2] + dist[u] < dist[v[0]]:
+                dist[v[0]] = v[2] + dist[u]
+                pq.update(v[0], dist[v[0]] + hn)
+                pre[v[0]] = (u, v[1])
+
+    ans = []
+    while goal != problem.getStartState():
+        ans.append(pre[goal][1])
+        goal = pre[goal][0]
+
+    ans.reverse()
+    return ans
 
 
 # Abbreviations
