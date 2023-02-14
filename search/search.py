@@ -214,7 +214,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     cost[init_state] = start_cost
 
     queue.push((init_state, start_action), start_cost)
-
     while not queue.isEmpty():
         current_node = queue.pop()
         current_state = current_node[0]
@@ -230,7 +229,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 if (next_move_state not in existed):
                     g = cost[current_state] + next_move_cost
                     next_node = (next_move_state, move[1])
-                    queue.update(next_node, g + heuristic(next_move_state, problem))
+                    queue.update(next_node, g +
+                                 heuristic(next_move_state, problem))
                     cost[next_move_state] = g
                     parent[next_node] = current_node
     return []
