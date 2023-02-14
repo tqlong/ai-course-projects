@@ -295,14 +295,18 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        ret = (self.startingPosition, False, False, False, False) 
+        return ret
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for t in state[1:]:
+            if t is False:
+                return False
+        return True
 
     def getSuccessors(self, state):
         """
@@ -325,7 +329,19 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            x, y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty] 
+            if hitsWall is False:
+                boolean = []
+                for i in range(len(self.corners)):
+                    value = ((nextx, nexty)==self.corners[i]) or\
+                                state[i+1]
+                    boolean.append(value)
+                state_next = ((nextx, nexty), boolean[0], boolean[1],\
+                                boolean[2], boolean[3])
+                successors.append((state_next, action, 1))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -360,7 +376,12 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    heuristic_value = 0
+    for i in range(len(corners)):
+        if state[i+1] is False:
+            heuristic_value = max(heuristic_value,\
+            abs(state[0][0]-corners[i][0])+abs(state[0][1]-corners[i][1]))
+    return heuristic_value # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -424,6 +445,18 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+# Newly defined class, used in foodHeuristic
+class NewState:
+    def __init__(self, state, walls):
+        self.state = state
+        self.walls = walls
+
+    def getWalls(self):
+        return self.walls
+
+    def getPacmanPosition(self):
+        return self.state[0]
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -454,7 +487,14 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    heuristic_value = 0
+    for i in range(foodGrid.height):
+        for j in range(foodGrid.width):
+            if foodGrid[j][i]:
+                heuristic_value = max(heuristic_value,\
+                                  mazeDistance((j, i), position,\
+                                  NewState(state, problem.walls)))
+    return heuristic_value
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -485,7 +525,16 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        cost = 1000000000
+        opt = []
+        for i in range(food.width):
+            for j in range(food.height):
+                if food[i][j]:
+                    path = search.bfs(problem)
+                    if len(path)<cost:
+                        opt = path
+                        cost = len(path)
+        return path
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -521,7 +570,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
 
 def mazeDistance(point1, point2, gameState):
     """
