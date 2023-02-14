@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -86,18 +88,72 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
+
+    from util import Stack
+
+    tree = Stack()
+    tree.push((problem.getStartState(), []))
+    visited = []
+
+    while not tree.isEmpty():
+        (current, path) = tree.pop()
+        if problem.isGoalState(current):
+            return path
+
+        if current not in visited:
+            visited.append(current)
+            successors = problem.getSuccessors(current)
+            for successor in successors:
+                tree.push((successor[0], path + [successor[1]]))
+    return []
     util.raiseNotDefined()
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
+
+    from util import Queue
+
+    tree = Queue()
+    tree.push((problem.getStartState(), []))
+    visited = []
+
+    while not tree.isEmpty():
+        (current, path) = tree.pop()
+        if problem.isGoalState(current):
+            return path
+
+        if current not in visited:
+            visited.append(current)
+            successors = problem.getSuccessors(current)
+            for successor in successors:
+                tree.push((successor[0], path + [successor[1]]))
+    return []
     util.raiseNotDefined()
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
+
+    from util import PriorityQueue
+
+    tree = PriorityQueue()
+    tree.push((problem.getStartState(), [], 0), 0)
+    visited = []
+
+    while not tree.isEmpty():
+        (current, path, cost) = tree.pop()
+        if problem.isGoalState(current):
+            return path
+
+        if current not in visited:
+            visited.append(current)
+            successors = problem.getSuccessors(current)
+            for successor in successors:
+                tree.push((successor[0], path + [successor[1]], successor[2] + cost), cost + successor[2])
+    return []
     util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,9 +162,29 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+
+    from util import PriorityQueue
+
+    tree = PriorityQueue()
+    tree.push((problem.getStartState(), [], 0), 0)
+    visited = []
+
+    while not tree.isEmpty():
+        (current, path, cost) = tree.pop()
+        if problem.isGoalState(current):
+            return path
+
+        if current not in visited:
+            visited.append(current)
+            successors = problem.getSuccessors(current)
+            for successor in successors:
+                tree.push((successor[0], path + [successor[1]], successor[2] + cost),
+                          cost + successor[2] + heuristic(successor[0], problem))
+    return []
+
     util.raiseNotDefined()
 
 
