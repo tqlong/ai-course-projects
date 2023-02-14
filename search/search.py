@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+
 
 class SearchProblem:
     """
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -87,17 +89,68 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.Stack()
+    fringe.push((problem.getStartState(), [], 0))
+    visited = []
+
+    while fringe.isEmpty() == False:
+        node = fringe.pop()
+
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if node[0] in visited == False:
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] in visited == False:
+                    fringe.push(successor[0], node[1] +
+                                [successor[1]], successor[2])
+            visited.append(node[0])
+
+    return []
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.Queue()
+    fringe.push((problem.getStartState(), [], 0))
+    visited = []
+
+    while fringe.isEmpty() == False:
+        node = fringe.pop()
+
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if node[0] in visited == False:
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] in visited == False:
+                    fringe.push(successor[0], node[1] +
+                                [successor[1]], successor[2])
+            visited.append(node[0])
+
+    return []
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.PriorityQueue()
+    fringe.push((problem.getStartState(), [], 0), 0)
+    visited = []
+
+    while fringe.isEmpty() == False:
+        node = fringe.pop()
+
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if node[0] in visited == False:
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] in visited == False:
+                    fringe.push(successor[0], node[1] +
+                                [successor[1]], node[2] + successor[2])
+            visited.append(node[0])
+
+    return []
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +159,30 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.PriorityQueue()
+    fringe.push((problem.getStartState(), [], 0), 0)
+    visited = []
+
+    while fringe.isEmpty() == False:
+        node = fringe.pop()
+
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if node[0] in visited == False:
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] in visited == False:
+                    newSuccessor = (successor[0], node[1] +
+                                    [successor[1]], node[2] + successor[2])
+                    totalCost = newSuccessor[2] + \
+                        heuristic(successor[0], problem)
+                    fringe.push(newSuccessor, totalCost)
+            visited.append(node[0])
+
+    return []
 
 
 # Abbreviations
