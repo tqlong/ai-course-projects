@@ -72,6 +72,38 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def dfsAlgorithm(problem, stack):
+    currentState = None
+    currentSuccessor = None
+    if stack.isEmpty():
+        currentState = problem.getStartState()
+        print(currentState)
+    else:
+        currentSuccessor = stack.pop()
+        stack.push(currentSuccessor)
+        currentState = currentSuccessor[0]
+
+    result = []
+    if problem.isGoalState(currentState):
+        if currentSuccessor == None:
+            result.append(currentSuccessor[1])
+        while not stack.isEmpty():
+            item = stack.pop()
+            result.insert(0, item[1])
+        return result
+
+    successors = problem.getSuccessors(currentState)
+    for successor in successors:
+        if successor[0] in problem._visited:
+            continue
+        stack.push(successor)
+        resultFromSuccessor = dfsAlgorithm(problem, stack)
+        if resultFromSuccessor != None:
+            return resultFromSuccessor
+        else:
+            stack.pop()
+    return None
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,7 +119,10 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack = util.Stack()
+    result = dfsAlgorithm(problem, stack)
+
+    return result
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
