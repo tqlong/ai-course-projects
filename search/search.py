@@ -92,16 +92,17 @@ def depthFirstSearch(problem):
     from util import Stack
     stack = Stack()
     visited = []
-    start = (problem.getStartState(),[])
+    start = (problem.getStartState(),[],0)
     stack.push(start)
+
     while not stack.isEmpty():
-        node, path = stack.pop()
-        if not node in visited:
+        node, path, cost = stack.pop()
+        if (not node in visited):
             visited.append(node)
-            if problem.isGoalState(node):
+            if (problem.isGoalState(node)):
                 return path
-            for neighbor, action, cost in problem.getSuccessors(node):
-                stack.push((neighbor, path + [action]))
+            for neighbor, action, step_cost in problem.getSuccessors(node):
+                stack.push((neighbor, path + [action], cost + step_cost))
     return []
     
 
@@ -112,35 +113,34 @@ def breadthFirstSearch(problem):
     queue = Queue()
     visited = []
     start = problem.getStartState()
-    queue.push((start, []))
-    while queue:
-        node, path = queue.pop()
+    queue.push((start, [], 0))
+    while not queue.isEmpty():
+        node, path, cost = queue.pop()
         if node in visited:
             continue
         visited.append(node)
         if problem.isGoalState(node):
             return path
-        for neighbor, action, cost in problem.getSuccessors(node):
-            queue.push((neighbor, path + [action]))
+        for neighbor, action, step_cost in problem.getSuccessors(node):
+            queue.push((neighbor, path + [action], cost + step_cost))
     return [] 
     
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    frontier = [(0, problem.getStartState(), [])]
+    queue = util.PriorityQueue()
     visited = set()
+    queue.push((problem.getStartState(), [], 0), 0)
     
-    while frontier:
-        cost, state, actions = heapq.heappop(frontier)
-        if problem.isGoalState(state):
-            return actions
-        
-        if state not in visited:
-            visited.add(state)
-            for successor, action, stepCost in problem.getSuccessors(state):
-                heapq.heappush(frontier, (cost + stepCost, successor, actions + [action]))
-                
+    while not queue.isEmpty():
+        node, path, cost = queue.pop()
+        if not node in visited:
+            visited.add(node)
+            if(problem.isGoalState(node)):
+                return path 
+            for neighbor, action, stepCost in problem.getSuccessors(node):
+                queue.push((neighbor, path + [action], cost + stepCost), cost + stepCost)
     return []
 
 def nullHeuristic(state, problem=None):
@@ -160,7 +160,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     while not queue.isEmpty():
         node, path, cost = queue.pop()
-        if not node in visited:
+        if (not node in visited):
             visited.add(node)
             if problem.isGoalState(node) :
                 return path

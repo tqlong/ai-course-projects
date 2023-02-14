@@ -176,7 +176,6 @@ class Grid:
         self.data = [[initialValue for y in range(height)] for x in range(width)]
         if bitRepresentation:
             self._unpackBits(bitRepresentation)
-    
     def __getitem__(self, i):
         return self.data[i]
 
