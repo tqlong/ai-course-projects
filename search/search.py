@@ -179,26 +179,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     currCost + nextCost + heuristic(nextState, problem)) 
         
     return []  
-    
-    # queue = util.PriorityQueue()
-    # queue.push((problem.getStartState(), [], 0), 0)
-    # visited = dict()
-
-    # while not queue.isEmpty():
-    #     currentState, steps, existedCost = queue.pop()
-    #     if currentState in visited and visited[currentState] <= existedCost:
-    #         continue
-    #     if problem.isGoalState(currentState):
-    #         return steps
-
-    #     visited[currentState] = existedCost
-    #     for state, action, cost in problem.getSuccessors(currentState):
-    #         queue.push((state, steps + [ action ], existedCost + cost), existedCost + cost + heuristic(state, problem))
-
-    # return []
-    
-    util.raiseNotDefined()
-
 
 # Abbreviations
 bfs = breadthFirstSearch
