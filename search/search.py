@@ -62,6 +62,38 @@ class SearchProblem:
         util.raiseNotDefined()
 
 
+def extractTrace(pathTrace, goalState):
+    _goalState = goalState
+    path = []
+
+    while _goalState is not None:
+        path.insert(0, _goalState)
+
+        _goalState = pathTrace[_goalState] if _goalState in pathTrace else None
+
+    return path
+
+def transformPath(path, start):
+    from game import Directions
+
+    location = start
+
+    for i in range(0, len(path)):
+        nextLocation = path[i]
+
+        if nextLocation[0] > location[0]:
+            path[i] = Directions.EAST
+        elif nextLocation[0] < location[0]:
+            path[i] = Directions.WEST
+        elif nextLocation[1] > location[1]:
+            path[i] = Directions.NORTH
+        elif nextLocation[1] < location[1]:
+            path[i] = Directions.SOUTH
+
+        location = nextLocation
+
+    path.remove(start)
+
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -87,17 +119,131 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    frontier = util.Stack()
+    frontier.push(problem.getStartState())
+    pathTrace = {}
+    visited = {}
+    solutionFound = False
+    goalState = None
+
+    while frontier.isEmpty() is False:
+        testState = frontier.pop()
+
+        if testState in visited:
+            continue;
+
+        visited[testState] = True
+
+        if problem.isGoalState(testState):
+            goalState = testState
+            solutionFound = True
+            break
+
+        successors = problem.getSuccessors(testState)
+
+        for successor in successors:
+            nextState = successor[0]
+
+            if nextState not in visited:
+                frontier.push(nextState)
+                pathTrace[nextState] = testState
+
+
+    if solutionFound is False:
+        return []
+
+    path = extractTrace(pathTrace, goalState)
+
+    transformPath(path, problem.getStartState())
+
+    return path
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    frontier = util.Queue()
+    frontier.push(problem.getStartState())
+    pathTrace = {}
+    visited = {}
+    solutionFound = False
+    goalState = None
+
+    while frontier.isEmpty() is False:
+        testState = frontier.pop()
+
+        if testState in visited:
+            continue;
+
+        visited[testState] = True
+
+        if problem.isGoalState(testState):
+            goalState = testState
+            solutionFound = True
+            break
+
+        successors = problem.getSuccessors(testState)
+
+        for successor in successors:
+            nextState = successor[0]
+
+            if nextState not in visited:
+                frontier.push(nextState)
+                pathTrace[nextState] = testState
+
+    if solutionFound is False:
+        return []
+
+    path = extractTrace(pathTrace, goalState)
+
+    transformPath(path, problem.getStartState())
+
+    return path
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    frontier = util.PriorityQueue()
+    frontier.push((problem.getStartState(), 0), 0)
+    pathTrace = {}
+    visited = {}
+    solutionFound = False
+    goalState = None
+
+    while frontier.isEmpty() is False:
+        (testState, testStateCost) = frontier.pop()
+
+        if testState in visited:
+            continue;
+
+        visited[testState] = True
+
+        if problem.isGoalState(testState):
+            goalState = testState
+            solutionFound = True
+            break
+
+        successors = problem.getSuccessors(testState)
+
+        for successor in successors:
+            nextState = successor[0]
+            nextStateCost = successor[2] + testStateCost
+
+            if nextState not in visited:
+                frontier.push((nextState, nextStateCost), -nextStateCost)
+                pathTrace[nextState] = testState
+
+    if solutionFound is False:
+        return []
+
+    path = extractTrace(pathTrace, goalState)
+
+    transformPath(path, problem.getStartState())
+
+    return path
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,8 +255,61 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    startState = problem.getStartState();
+    openList = set([startState])
+    closedList = set([])
+    pathTrace = {}
+    g = {}
+    solutionFound = False
+    goalState = None
+
+    g[startState] = 0
+
+    while len(openList) != 0:
+        testState = None
+
+        for state in openList:
+            if testState == None or g[state] + heuristic(state, problem) < g[testState] + heuristic(testState, problem):
+                testState = state
+
+        if testState == None:
+            break
+
+        if problem.isGoalState(testState):
+            solutionFound = True
+            goalState = testState
+            break
+
+        successors = problem.getSuccessors(testState)
+
+        for successor in successors:
+            (nextState, _, actionCost) = successor
+            
+            if nextState not in openList and nextState not in closedList:
+                openList.add(nextState)
+                pathTrace[nextState] = testState
+                g[nextState] = g[testState] + actionCost
+            else:
+                if g[nextState] > g[testState] + actionCost:
+                    g[nextState] = g[testState] + actionCost
+                    pathTrace[nextState] = testState
+
+                    if nextState in closedList:
+                        closedList.remove(nextState)
+                        openList.add(nextState)
+
+        openList.remove(testState)
+        closedList.add(testState)
+
+    if solutionFound is False:
+        return []
+
+    path = extractTrace(pathTrace, goalState)
+
+    transformPath(path, problem.getStartState())
+
+    return path
 
 # Abbreviations
 bfs = breadthFirstSearch
