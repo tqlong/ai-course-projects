@@ -87,16 +87,52 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    visited = set()
+    stack = util.Stack()
+    stack.push((problem.getStartState(), []))
+    while not stack.isEmpty():
+        state, actions = stack.pop()
+        if state in visited:
+            continue
+        visited.add(state)
+        if problem.isGoalState(state):
+            return actions
+        for successor, action, stepCount in problem.getSuccessors(state):
+            stack.push((successor, actions + [action]))
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    visited = set()
+    queue = util.Queue()
+    queue.push((problem.getStartState(), []))
+    while not queue.isEmpty():
+        state, actions = queue.pop()
+        if state in visited:
+            continue
+        visited.add(state)
+        if problem.isGoalState(state):
+            return actions
+        for successor, action, stepCost in problem.getSuccessors(state):
+            queue.push((successor, actions + [action]))
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    visited = set()
+    pqueue = util.PriorityQueue()
+    pqueue.update((problem.getStartState(), []), 0)
+    while not pqueue.isEmpty():
+        state, actions = pqueue.pop()
+        if state in visited:
+            continue
+        visited.add(state)
+        if problem.isGoalState(state):
+            return actions
+        for successor, action, stepCost in problem.getSuccessors(state):
+            pqueue.update((successor, actions + [action]), stepCost + problem.getCostOfActions(actions))
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -109,6 +145,18 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    visited = set()
+    pqueue = util.PriorityQueue()
+    pqueue.update((problem.getStartState(), []), 0)
+    while not pqueue.isEmpty():
+        state, actions = pqueue.pop()
+        if state in visited:
+            continue
+        visited.add(state)
+        if problem.isGoalState(state):
+            return actions
+        for successor, action, stepCost in problem.getSuccessors(state):
+            pqueue.update((successor, actions + [action]), stepCost + problem.getCostOfActions(actions) + heuristic(successor, problem))
     util.raiseNotDefined()
 
 
