@@ -91,18 +91,18 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
 
     fringe = util.Stack()
-    fringe.push((problem.getStartState(), [], 0))
+    fringe.push((problem.getStartState(), []))
 
-    visitedState = list(problem.getStartState())
+    visitedState = []
 
     while not fringe.isEmpty():
-        curState, curActions, curCost = fringe.pop()
-        if (problem.isGoalState(curState)):
-            return curActions
-        for state, action, cost in problem.getSuccessors(curState):
-            if not (state in visitedState):
-                fringe.push((state, curActions + [action], curCost + cost))
-                visitedState.append(state)
+        curState, actions = fringe.pop()
+        if curState not in visitedState:
+            visitedState.append(curState)
+            if (problem.isGoalState(curState)):
+                return actions
+            for state, action, _ in problem.getSuccessors(curState):
+                fringe.push((state, actions + [action]))
 
     util.raiseNotDefined()
 

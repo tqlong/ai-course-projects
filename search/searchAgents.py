@@ -415,7 +415,8 @@ def cornersHeuristic(state, problem):
     totalCost = 0
     curPoint = currentPosition
     while cornersUnvisited:
-        heu_cost, corner = min([(util.manhattanDistance(curPoint, corner), corner) for corner in cornersUnvisited])
+        heu_cost, corner = min([(util.manhattanDistance(
+            curPoint, corner), corner) for corner in cornersUnvisited])
         curPoint = corner
         cornersUnvisited.remove(corner)
         totalCost += heu_cost
@@ -525,7 +526,14 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
 
-    return 0
+    foodsPosition = foodGrid.asList()
+    # my bug
+    if (len(foodsPosition) == 0):
+        return 0
+    maxDis = max([mazeDistance(position, food, problem.startingGameState)
+                  for food in foodsPosition])
+
+    return maxDis
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -560,6 +568,8 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.bfs(problem)
+
         util.raiseNotDefined()
 
 
@@ -597,7 +607,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x, y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
 
 
 def mazeDistance(point1, point2, gameState):
