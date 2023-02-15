@@ -81,23 +81,79 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from game import Directions
+
+    def dfs(start, directionStack, visitedCoordSet):
+        visitedCoordSet.add(start)
+
+        if problem.isGoalState(start):
+            return True
+
+        for next in reversed(problem.getSuccessors(start)):
+            if next[0] not in visitedCoordSet:
+                directionStack.push(next[1])
+
+                if dfs(next[0], directionStack, visitedCoordSet):
+                    return True
+
+                directionStack.pop()
+
+        return False
+
+    directionStack = util.Stack()
+    visitedCoordSet = set()
+    
+    dfs(problem.getStartState(), directionStack, visitedCoordSet)
+    print(directionStack.list)
+    return directionStack.list
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def bfs(start):
+        visitedCoordArray = []
+        willBeVisitedCoordQueue = util.Queue()
+        willBeVisitedCoordQueue.push((start, []))
+        
+        while not willBeVisitedCoordQueue.isEmpty():
+            coord, path = willBeVisitedCoordQueue.pop()
+
+            if coord not in visitedCoordArray:
+                if problem.isGoalState(coord):
+                    return path
+
+                for neighbor in problem.getSuccessors(coord):
+                    if neighbor[0] not in visitedCoordArray:
+                        newPath = path + [neighbor[1]]
+                        willBeVisitedCoordQueue.push((neighbor[0], newPath))
+                visitedCoordArray.append(coord)
+
+        return path
+
+    return bfs(problem.getStartState())
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    visitedCoord = set()
+    willBeVisitedCoordPQueue = util.PriorityQueue()
+    willBeVisitedCoordPQueue.push((start, []) ,0)
+    
+    while not willBeVisitedCoordPQueue.isEmpty():
+        coord, path = willBeVisitedCoordPQueue.pop()
+
+        if coord not in visitedCoord:
+            if problem.isGoalState(coord):
+                print(path)
+                return path
+
+            for neighbor in problem.getSuccessors(coord):
+                if neighbor[0] not in visitedCoord:
+                    newPath = path + [neighbor[1]]
+                    willBeVisitedCoordPQueue.push((neighbor[0], newPath), problem.getCostOfActions(newPath))
+            visitedCoord.add(coord)
+
+    return path
 
 def nullHeuristic(state, problem=None):
     """
@@ -108,8 +164,25 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    visitedCoord = []
+    willBeVisitedCoordPQueue = util.PriorityQueue()
+    willBeVisitedCoordPQueue.push((start, []) ,0)
+    
+    while not willBeVisitedCoordPQueue.isEmpty():
+        coord, path = willBeVisitedCoordPQueue.pop()
+
+        if coord not in visitedCoord:
+            if problem.isGoalState(coord):
+                return path
+                
+            for neighbor in problem.getSuccessors(coord):
+                if neighbor[0] not in visitedCoord:
+                    newPath = path + [neighbor[1]]
+                    willBeVisitedCoordPQueue.push((neighbor[0], newPath), problem.getCostOfActions(newPath) + heuristic(neighbor[0], problem))
+            visitedCoord.append(coord)
+
+    return path
 
 
 # Abbreviations
