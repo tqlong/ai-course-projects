@@ -332,25 +332,25 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
 
-        self._expanded += 1 # DO NOT CHANGE
-        currentPosition, cornersVisited = state
-        x, y = currentPosition
-        dx, dy = Actions.directionToVector(action)
-        nextX, nextY = int(x + dx), int(y + dy)
-        nextCornersVisited = cornersVisited[:]
-        hitsWall = self.walls[nextX][nextY]
-        if (not hitsWall):
-            atCorners = 0
-            for corner in self.corners:
-                if (nextX, nextY) == corner:
-                    break
-                atCorners += 1
-            if(atCorners < 4):
-                nextCornersVisited[atCorners] = True
-            nextState = ((nextX, nextY), nextCornersVisited)
-            stepCost = 1
-            successors.append((nextState, action, stepCost))
-        self._expanded += 1  # DO NOT CHANGE
+            self._expanded += 1 # DO NOT CHANGE
+            currentPosition, cornersVisited = state
+            x, y = currentPosition
+            dx, dy = Actions.directionToVector(action)
+            nextX, nextY = int(x + dx), int(y + dy)
+            nextCornersVisited = cornersVisited[:]
+            hitsWall = self.walls[nextX][nextY]
+            if (not hitsWall):
+                atCorners = 0
+                for corner in self.corners:
+                    if (nextX, nextY) == corner:
+                        break
+                    atCorners += 1
+                if(atCorners < 4):
+                    nextCornersVisited[atCorners] = True
+                nextState = ((nextX, nextY), nextCornersVisited)
+                stepCost = 1
+                successors.append((nextState, action, stepCost))
+            self._expanded += 1  # DO NOT CHANGE
         return successors
 
     def getCostOfActions(self, actions):
