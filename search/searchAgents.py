@@ -295,14 +295,21 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return self.startingPosition, self.corners
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        position, corners = state
+        # Pac-man co vi tri la goc cuoi cung chua duyet
+        if position in corners and len(corners) == 1:
+            return True
+        
+        return False
 
     def getSuccessors(self, state):
         """
@@ -314,8 +321,9 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-
+        # khai bao danh sach successors rong
         successors = []
+        # vong lap theo cac huong di chuyen
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -325,6 +333,26 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            # vi tri hien tai cua Pac-man va vi tri cac goc chua duyet
+            currentPosition, corners = state
+            # vi tri Pac-man duoi dang x, y
+            x, y = currentPosition
+            # tinh toan di chuyen tu huong sang x, y
+            dx, dy = Actions.directionToVector(action)
+            # vi tri di chuyen tuong ung
+            nextx, nexty = int(x + dx), int(y + dy)
+            # kiem tra co phai vi tri tuong k
+            hitsWall = self.walls[nextx][nexty]
+
+            if not hitsWall:
+                if currentPosition in corners:
+                    # vi tri hien tai la goc thi can cap nhat lai corners
+                    temp = list(corners)
+                    temp.remove(currentPosition)
+                    corners = tuple(temp)
+
+                nextState = ((nextx, nexty), corners)
+                successors.append((nextState, action, 1))   
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -356,11 +384,29 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.corners # These are the corner coordinates
+    # corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    # vi tri hien tai cua Pac-man va vi tri cac goc chua duyet
+    currentPosition, corners = state
+    # vi tri Pac-man duoi dang x, y
+    pmX, pmY = currentPosition
+    # tao chuoi rong chua khoang cach toi cac goc
+    distances = []
+    # tinh khoang cach toi cac goc cua Pac-man
+    for corner in corners:
+        cX, cY = corner
+        # khoang cach Manhatan 
+        distance = abs(pmX - cX) + abs(pmY - cY)
+        distances.append(distance)
+    
+    heuristic = max(distances)
+    if problem.isGoalState(state):
+        return 0
+
+    return heuristic
+    # return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -454,7 +500,22 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    # kiem tra trang thai muc tieu
+    if problem.isGoalState(state):
+        return 0
+    # tao danh sach rong luu khoang cach pac-man vs thuc an
+    distances = []
+    # lap doi voi tat ca vi tri thuc an con lai
+    for food in foodList:
+        # tao bai toan tim kiem voi vi tri Pac-man va vi tri food la muc tieu
+        newProblem = PositionSearchProblem(problem.startingGameState, start=position, goal=food, warn=False, visualize=False)
+        # tim cach giai quyet bang dfs
+        distance = len(search.bfs(newProblem))
+        distances.append(distance)
+
+    heuristic = max(distances)
+    return heuristic
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -485,7 +546,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -521,7 +582,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # Tra ve True neu vi tri cua Pac-man trung voi vi tri cua thuc an
+        if state in self.food.asList():
+            return True
+
+        return False
 
 def mazeDistance(point1, point2, gameState):
     """

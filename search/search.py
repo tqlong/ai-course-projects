@@ -87,16 +87,82 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    # lay trang thai bat dau 
+    startState = problem.getStartState()
+    # khoi tao danh sach mo rong voi trang thai bat dau
+    expendedList = util.Stack()
+    expendedList.push((startState, []))
+    # danh sach trang thai da kiem tra
+    vistedList = []
+
+    while not expendedList.isEmpty():
+        
+        currentState, actionPath = expendedList.pop()
+        if currentState in vistedList: 
+            continue
+        vistedList.append(currentState)
+        # kiem tra trang thai muc tieu
+        if problem.isGoalState(currentState):
+            return actionPath
+        # mo rong cac trang thai bien vao danh sach    
+        for successor, action, cost in problem.getSuccessors(currentState):
+            expendedList.push((successor, actionPath + [action]))
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    # lay trang thai bat dau 
+    startState = problem.getStartState()
+    # khoi tao danh sach mo rong voi trang thai bat dau
+    expendedList = util.Queue()
+    expendedList.push((startState, []))
+    # danh sach trang thai da kiem tra
+    vistedList = []
+
+    while not expendedList.isEmpty():
+        
+        currentState, actionPath = expendedList.pop()
+        if currentState in vistedList: 
+            continue
+        vistedList.append(currentState)
+        # kiem tra trang thai muc tieu
+        if problem.isGoalState(currentState):
+            return actionPath
+        # mo rong cac trang thai bien vao danh sach    
+        for successor, action, cost in problem.getSuccessors(currentState):
+            expendedList.push((successor, actionPath + [action]))
+
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    # lay trang thai bat dau 
+    startState = problem.getStartState()
+    # khoi tao danh sach mo rong voi trang thai bat dau
+    expendedList = util.PriorityQueue()
+    # state, path, cost, priority
+    expendedList.push((startState, [], 0), 0)
+    # danh sach trang thai da kiem tra
+    vistedList = []
+
+    while not expendedList.isEmpty():
+        
+        currentState, actionPath, preCost = expendedList.pop()
+        if currentState in vistedList: 
+            continue
+        vistedList.append(currentState)
+        # kiem tra trang thai muc tieu
+        if problem.isGoalState(currentState):
+            return actionPath
+        # mo rong cac trang thai bien vao danh sach    
+        for successor, action, cost in problem.getSuccessors(currentState):
+            newAction = actionPath + [action]
+            newCost = preCost + cost
+            expendedList.push((successor, newAction, newCost), newCost)
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -109,7 +175,30 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # lay trang thai bat dau 
+    startState = problem.getStartState()
+    # khoi tao danh sach mo rong voi trang thai bat dau
+    expendedList = util.PriorityQueue()
+    # state, path, cost, priority
+    expendedList.push((startState, [], 0), 0)
+    # danh sach trang thai da kiem tra
+    vistedList = []
+
+    while not expendedList.isEmpty():
+        
+        currentState, actionPath, preCost = expendedList.pop()
+        if currentState in vistedList: 
+            continue
+        vistedList.append(currentState)
+        # kiem tra trang thai muc tieu
+        if problem.isGoalState(currentState):
+            return actionPath
+        # mo rong cac trang thai bien vao danh sach    
+        for successor, action, cost in problem.getSuccessors(currentState):
+            newAction = actionPath + [action]
+            newCost = preCost + cost
+            expendedList.push((successor, newAction, newCost), newCost + heuristic(successor, problem))
+    
 
 
 # Abbreviations
