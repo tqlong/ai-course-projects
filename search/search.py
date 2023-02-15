@@ -69,6 +69,7 @@ def tinyMazeSearch(problem):
     sequence of moves will be incorrect, so only use this for tinyMaze.
     """
     from game import Directions
+
     s = Directions.SOUTH
     w = Directions.WEST
     return [s, s, w, s, w, w, s, w]
@@ -90,7 +91,7 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     fringe = util.Stack()
-    fringe.push((problem.getStartState(), [], 0))
+    fringe.push((problem.getStartState(), []))
     visited = []
 
     while fringe.isEmpty() == False:
@@ -98,12 +99,11 @@ def depthFirstSearch(problem):
 
         if problem.isGoalState(node[0]):
             return node[1]
-        if node[0] in visited == False:
-            for successor in problem.getSuccessors(node[0]):
-                if successor[0] in visited == False:
-                    fringe.push(successor[0], node[1] +
-                                [successor[1]], successor[2])
+        if node[0] not in visited:
             visited.append(node[0])
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] not in visited:
+                    fringe.push((successor[0], node[1] + [successor[1]]))
 
     return []
 
@@ -112,7 +112,7 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     fringe = util.Queue()
-    fringe.push((problem.getStartState(), [], 0))
+    fringe.push((problem.getStartState(), []))
     visited = []
 
     while fringe.isEmpty() == False:
@@ -120,12 +120,11 @@ def breadthFirstSearch(problem):
 
         if problem.isGoalState(node[0]):
             return node[1]
-        if node[0] in visited == False:
-            for successor in problem.getSuccessors(node[0]):
-                if successor[0] in visited == False:
-                    fringe.push(successor[0], node[1] +
-                                [successor[1]], successor[2])
+        if node[0] not in visited:
             visited.append(node[0])
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] not in visited:
+                    fringe.push((successor[0], node[1] + [successor[1]]))
 
     return []
 
@@ -142,12 +141,18 @@ def uniformCostSearch(problem):
 
         if problem.isGoalState(node[0]):
             return node[1]
-        if node[0] in visited == False:
-            for successor in problem.getSuccessors(node[0]):
-                if successor[0] in visited == False:
-                    fringe.push(successor[0], node[1] +
-                                [successor[1]], node[2] + successor[2])
+        if node[0] not in visited:
             visited.append(node[0])
+            for successor in problem.getSuccessors(node[0]):
+                if successor[0] not in visited:
+                    fringe.push(
+                        (
+                            successor[0],
+                            node[1] + [successor[1]],
+                            node[2] + successor[2],
+                        ),
+                        node[2] + successor[2],
+                    )
 
     return []
 
@@ -172,15 +177,17 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
         if problem.isGoalState(node[0]):
             return node[1]
-        if node[0] in visited == False:
+        if node[0] not in visited:
             for successor in problem.getSuccessors(node[0]):
-                if successor[0] in visited == False:
-                    newSuccessor = (successor[0], node[1] +
-                                    [successor[1]], node[2] + successor[2])
-                    totalCost = newSuccessor[2] + \
-                        heuristic(successor[0], problem)
+                if successor[0] not in visited:
+                    visited.append(node[0])
+                    newSuccessor = (
+                        successor[0],
+                        node[1] + [successor[1]],
+                        node[2] + successor[2],
+                    )
+                    totalCost = newSuccessor[2] + heuristic(successor[0], problem)
                     fringe.push(newSuccessor, totalCost)
-            visited.append(node[0])
 
     return []
 
