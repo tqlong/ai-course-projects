@@ -333,8 +333,8 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x+dx), int(y+dy)
             hitsWall = self.walls[nextx][nexty]
-            if hitsWall: continue
-            if (nextx, nexty) in remainingCorners:
+            if not hitsWall: continue
+            elif (nextx, nexty) in remainingCorners:
                 remainingCorners.remove(nextx, nexty)
             successors.append(((nextx, nexty), tuple(reminingCorners)), action, 1)
 
@@ -375,12 +375,10 @@ def cornersHeuristic(state, problem):
     result = 0
     currentPosition, remainingCorners = state[0], list(state[1]).copy()
     while remainingCorners:
-        for corner in remainingCorners:
-            # minManDis = util.manhattanDistance(currentPosition, corner)
-            minDis, corner = min([(util.manhattanDistance(currentPosition, corner), corner) for corner in remainingCorners])
-            result += minDis
-            currentPosition = corner
-            remainingCorners.remove(corner)
+        minDis, corner = min([(util.manhattanDistance(currentPosition, corner), corner) for corner in remainingCorners])
+        result += minDis
+        currentPosition = corner
+        remainingCorners.remove(corner)
 
     return result
     return 0 # Default to trivial solution
