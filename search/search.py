@@ -88,17 +88,19 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     stack = util.Stack()
-    checkVisited = set() #store visited node
+    checkVisited = [] #store visited node
     startState = problem.getStartState()
     if problem.isGoalState(startState):
         return []
-    else: stack.psuh(startState, [])
+    else: stack.psuh((startState, []))
     while not stack.isEmpty():
         state, actions = stack.pop()
         if state not in checkVisited:
-            visited.append(state)
+            checkVisited.append(state)
+            if problem.isGoalState(state):
+                return actions
             for nextState in problem.getSuccessors(state):
-                stack.push(nextState[0]. actions + nextState[1])
+                stack.push((nextState[0]. actions + nextState[1]))
     return []
     # util.raiseNotDefined()
 
@@ -106,7 +108,7 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     queue = util.Queue()
-    checkVisited = set() #store visited node
+    checkVisited = [] #store visited node
     startState = problem.getStartState()
     if problem.isGoalState(startState):
         return []
@@ -114,9 +116,11 @@ def breadthFirstSearch(problem):
     while not queue.isEmpty():
         state, actions = queue.pop()
         if state not in checkVisited:
-            visited.append(startState)
+            checkVisited.append(startState)
+            if problem.isGoalState(state):
+                return actions
             for nextState in problem.getSuccessors(state):
-                queue.push(nextState[0], actions + nextState[1])
+                queue.push((nextState[0], actions + nextState[1]))
     return []
     # util.raiseNotDefined()
 
@@ -125,7 +129,7 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     priQueue = util.PriorityQueue()
-    checkVisited = set() #store visited node
+    checkVisited = [] #store visited node
     startState = problem.getStartState()
     if problem.isGoalState(startState):
         return []
@@ -134,10 +138,12 @@ def uniformCostSearch(problem):
     while not priQueue.isEmpty():
         state, actions = priQueue.pop()
         if (state not in checkVisited):
-            visited.append(startState)
+            checkVisited.append(startState)
+            if problem.isGoalState(state):
+                return actions
             for nextState in problem.getSuccessors(state):
-                cost = problem.getCostOfActions(actions + nextState[1]) + nullHeuristic(nextState[0], problem)
-                priQueue.push((nextState[0], actions + nextState[1]), cost)
+                cost = problem.getCostOfActions(actions + [nextState[1]])
+                priQueue.push((nextState[0], actions + [nextState[1]]), cost)
     return []
     # util.raiseNotDefined()
 
@@ -152,7 +158,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     priQueue = util.PriorityQueue()
-    checkVisited = set() #store visited node
+    checkVisited = [] #store visited node
     startState = problem.getStartState()
     if problem.isGoalState(startState):
         return []
@@ -161,11 +167,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while not priQueue.isEmpty():
         state, actions = priQueue.pop()
         if (state not in checkVisited):
-            visited.append(startState)
+            checkVisited.append(startState)
             if problem.isGoalState(state):
                 return actions
             for nextState in problem.getSuccessors(state):
-                cost = problem.getCostOfActions(actions + nextState[1]) + nullHeuristic(nextState[0], problem)
+                cost = problem.getCostOfActions(actions + nextState[1]) + heuristic(nextState[0], problem)
                 priQueue.push((nextState[0], actions + nextState[1]), cost)
     return []
     # util.raiseNotDefined()
