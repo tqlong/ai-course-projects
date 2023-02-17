@@ -90,9 +90,11 @@ def depthFirstSearch(problem):
     stack = util.Stack()
     checkVisited = [] #store visited node
     startState = problem.getStartState()
-    if problem.isGoalState(startState):
+
+    if (problem.isGoalState(startState)):
         return []
-    else: stack.psuh((startState, []))
+
+    stack.push((startState, []))
     while not stack.isEmpty():
         state, actions = stack.pop()
         if state not in checkVisited:
@@ -110,9 +112,11 @@ def breadthFirstSearch(problem):
     queue = util.Queue()
     checkVisited = [] #store visited node
     startState = problem.getStartState()
+
     if problem.isGoalState(startState):
         return []
-    else: queue.push(startState, [])
+
+    queue.push((startState, []))
     while not queue.isEmpty():
         state, actions = queue.pop()
         if state not in checkVisited:
@@ -131,10 +135,11 @@ def uniformCostSearch(problem):
     priQueue = util.PriorityQueue()
     checkVisited = [] #store visited node
     startState = problem.getStartState()
+
     if problem.isGoalState(startState):
         return []
-    else:
-        priQueue.push((startState, []), 0)
+    
+    priQueue.push((startState, []), 0)
     while not priQueue.isEmpty():
         state, actions = priQueue.pop()
         if (state not in checkVisited):
@@ -142,7 +147,7 @@ def uniformCostSearch(problem):
             if problem.isGoalState(state):
                 return actions
             for nextState in problem.getSuccessors(state):
-                cost = problem.getCostOfActions(actions + [nextState[1]])
+                cost = problem.getCostOfActions(actions + [nextState[1]]) + nullHeuristic(nextState[0], problem)
                 priQueue.push((nextState[0], actions + [nextState[1]]), cost)
     return []
     # util.raiseNotDefined()
@@ -160,10 +165,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     priQueue = util.PriorityQueue()
     checkVisited = [] #store visited node
     startState = problem.getStartState()
+    
     if problem.isGoalState(startState):
         return []
-    else:
-        priQueue.push((startState, []), 0)
+    
+    priQueue.push((startState, []), 0)
     while not priQueue.isEmpty():
         state, actions = priQueue.pop()
         if (state not in checkVisited):
