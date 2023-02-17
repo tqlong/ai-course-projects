@@ -288,7 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.startState = (self.startingPosition, self.corners)
+        self.startState = (self.startingPosition, [])
 
     def getStartState(self):
         """
@@ -305,7 +305,7 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
         # util.raiseNotDefined()
-        return len(state[1]) == 0
+        return len(state[1]) == len(self.corners)
 
     def getSuccessors(self, state):
         """
@@ -333,10 +333,15 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x+dx), int(y+dy)
             hitsWall = self.walls[nextx][nexty]
-            if not hitsWall: continue
-            elif (nextx, nexty) in remainingCorners:
-                remainingCorners.remove(nextx, nexty)
-            successors.append(((nextx, nexty), tuple(reminingCorners)), action, 1)
+
+            if hitsWall: 
+                continue
+
+            nextPosition = (nextx, nexty)
+            corners = state[1].copy()
+            if ((nextPosition in self.corners) and (nextPosition not in corners)):
+                corners.append(nextPosition)
+            successors.append((nextPosition, corners), action, 1)
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -475,12 +480,15 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    heuristic = 0
-    arr = foodGrid.asList();
-    for i in arr: 
-        heuristic = max(heuristic, mazeDistance(position, i, problem.startingGameState))
+    foodList = foodGrid.asList()
+    if not foodList: 
+        return 0
     
-    return heuristic
+    if len(foodList) == 1:
+        return mazeDistance(position, foodList[0], problem.startingGameState)
+
+    maxDistance = max([mazeDistance(position, food, problem.startingGameState) for food in foodList])
+    return maxDistance
     # return 0
 
 class ClosestDotSearchAgent(SearchAgent):
