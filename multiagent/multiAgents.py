@@ -380,52 +380,35 @@ def betterEvaluationFunction(currentGameState):
     "*** YOUR CODE HERE ***"
 
     position = currentGameState.getPacmanPosition()
-    currentFoods = currentGameState.getFood()
+    foodPosition = currentGameState.getFood().asList()
+    numFoodRemain = len(foodPosition)
     ghostStates = currentGameState.getGhostStates()
-    newScaredTimes = [
-        ghostState.scaredTimer for ghostState in ghostStates]
+    remainingCapsules = len(currentGameState.getCapsules())
 
-    "*** YOUR CODE HERE ***"
     val = 0
-    if (currentGameState.isWin()):
-        return 99999
-    if (currentGameState.isLose()):
-        return -99999
 
-    # Seeking for food, i want it to be BFS
+    foodDis = [manhattanDistance(position, food) for food in foodPosition]
+    if (numFoodRemain != 0):
+        val -= min(foodDis)
 
-    numEaten = len(currentFoods.asList())
-    sumFood = sum([manhattanDistance(position, food) for food in currentFoods.asList()])
-    numCapsules = len(currentGameState.getCapsules())
-    val += numEaten + numCapsules - sumFood * 2
+    val -= 20 * remainingCapsules
+    val -= 4 * numFoodRemain
 
-    # Run from ghost if distance is relatively small
-    currentGhostStates = currentGameState.getGhostStates()
+    val += currentGameState.getScore()
+
     nearestGhostLater = min([manhattanDistance(
         position, ghostState.getPosition()) for ghostState in ghostStates])
     nearestGhostCurrent = min([manhattanDistance(
-        position, ghostState.getPosition()) for ghostState in currentGhostStates])
+        position, ghostState.getPosition()) for ghostState in ghostStates])
 
-    if (nearestGhostLater < 20):
-        val -= 5
+    if (nearestGhostLater < 2):
+        val -= 50
 
     if (nearestGhostLater < nearestGhostCurrent):
-        val += 5
+        val += 100
     else:
-        val -= 2.5
-
-    pacmanState = currentGameState.getPacmanState()
-    dir = pacmanState.getDirection()
-    print("DIR: ", dir)
-    if (dir == 'Stop'):
-        val -= 1
-
-    # Which causes me LOSE most of the time
-    # if (action == Directions.STOP):
-    #     val -= 10
-
+        val -= 50
     return val
-    util.raiseNotDefined()
 
 
 # Abbreviation
