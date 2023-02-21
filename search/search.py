@@ -87,45 +87,41 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    stack = util.Stack()
-    checkVisited = [] #store visited node
     startState = problem.getStartState()
+    stack = [startState]
+    checkVisited = set()
 
     if (problem.isGoalState(startState)):
         return []
-
-    stack.push((startState, []))
-    while not stack.isEmpty():
-        state, actions = stack.pop()
-        if state not in checkVisited:
-            checkVisited.append(state)
-            if problem.isGoalState(state):
-                return actions
-            for nextState in problem.getSuccessors(state):
-                stack.push((nextState[0]. actions + nextState[1]))
-    return []
+    while stack:
+        vertex = stack.pop()
+        if vertex in checkVisited:
+            continue
+        yield vertex
+        checkVisited.add(vertex)
+        for successor in problem.getSuccessors(vertex):
+            stack.append(successor)
+    # return checkVisited
     # util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    queue = util.Queue()
-    checkVisited = [] #store visited node
     startState = problem.getStartState()
+    queue =[]
+    checkVisited = set()
 
     if problem.isGoalState(startState):
         return []
-
-    queue.push((startState, []))
-    while not queue.isEmpty():
-        state, actions = queue.pop()
-        if state not in checkVisited:
-            checkVisited.append(startState)
-            if problem.isGoalState(state):
-                return actions
-            for nextState in problem.getSuccessors(state):
-                queue.push((nextState[0], actions + nextState[1]))
-    return []
+    queue.append(startState)
+    while queue: 
+        vertex = queue.pop()
+        if vertex in checkVisited:
+            continue
+        yield vertex
+        checkVisited.add(vertex)
+        for successor in problem.getSuccessors(vertex):
+            queue.append(successor)
     # util.raiseNotDefined()
 
 
