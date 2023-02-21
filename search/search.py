@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -86,18 +88,97 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
+    global action
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    f = util.Stack()
+    choices = []
+
+    base = problem.getStartState()
+    start = (base, [])
+
+    f.push(start)
+
+    while f.isEmpty() == False:
+        state, action = f.pop()
+
+        if state not in choices:
+            choices.append(state)
+
+            if problem.isGoalState(state):
+                return action
+            print(state)
+            winrace = problem.getSuccessors(state)
+            for state_i, move, _ in winrace:
+                tmp = [move]
+                newNode = (state_i, action + tmp)
+                f.push(newNode)
+
+    return action
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
+    global action
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    f = util.Queue()
+    choices = []
+
+    base = problem.getStartState()
+    start = (base, [], 0)
+
+    f.push(start)
+
+    while not f.isEmpty():
+        # print(1)
+        state, action, cost = f.pop()
+        # print('state', state)
+        if state not in choices:
+            choices.append(state)
+
+            if problem.isGoalState(state):
+                return action
+
+            winrace = problem.getSuccessors(state)
+            for state_i, move, cost_i in winrace:
+                tmp = action + [move]
+                newcost = cost + cost_i
+                newNode = (state_i, tmp, newcost)
+                f.push(newNode)
+
+    return action
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    """Search the shallowest nodes in the search tree first."""
+    global action
+    "*** YOUR CODE HERE ***"
+    f = util.PriorityQueue()
+    choices = {}
+
+    base = problem.getStartState()
+    start = (base, [], 0)
+
+    f.push(start, 0)
+
+    while not f.isEmpty():
+        # print(1)
+        state, action, cost = f.pop()
+        # print('state', state)
+        if (state not in choices) or (cost < choices[state]):
+            choices[state] = cost
+            if problem.isGoalState(state):
+                return action
+
+            winrace = problem.getSuccessors(state)
+            for state_i, move, cost_i in winrace:
+                tmp = action + [move]
+                newcost = cost + cost_i
+                newNode = (state_i, tmp, newcost)
+                f.update(newNode, newcost)
+    return action
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -106,10 +187,47 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    global action
+    f = util.PriorityQueue()
+    choices = []
+
+    base = problem.getStartState()
+    start = (base, [], 0)
+
+    f.push(start, 0)
+
+    while not f.isEmpty():
+        state, action, cost = f.pop()
+
+        choices.append((state, cost))
+
+        if problem.isGoalState(state):
+            return action
+
+        winrace = problem.getSuccessors(state)
+        for state_i, move, cost_i in winrace:
+            tmp = action + [move]
+            newcost = cost + cost_i
+            newNode = (state_i, tmp, newcost)
+
+            moved_bool = False
+            for choice in choices:
+                # examine each explored node tuple
+                state_j, cost_j = choice
+
+                if (state_i == state_j) and (newcost >= cost_j):
+                    moved_bool = True
+
+            # if this successor not explored, put on frontier and explored list
+            if not moved_bool:
+                f.push(newNode, newcost + heuristic(state_i, problem))
+                choices.append((state_i, newcost))
+
+    return action
 
 
 # Abbreviations
