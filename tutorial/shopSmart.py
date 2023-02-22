@@ -21,6 +21,7 @@ For orders:  [('apples', 1.0), ('oranges', 3.0)] best shop is shop1
 For orders:  [('apples', 3.0)] best shop is shop2
 """
 from __future__ import print_function
+import sys
 import shop
 
 
@@ -30,7 +31,14 @@ def shopSmart(orderList, fruitShops):
         fruitShops: List of FruitShops
     """
     "*** YOUR CODE HERE ***"
-    return None
+    min = sys.float_info.max
+    bestShop = ''
+    for x in fruitShops:
+        total = shop.FruitShop.getPriceOfOrder(x, orderList)
+        if total < min:
+            min = total
+            bestShop = x
+    return bestShop
 
 
 if __name__ == '__main__':
