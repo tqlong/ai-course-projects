@@ -61,6 +61,42 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
+class Node:
+    def __init__(self, state, parent, action, cost):
+        self.state = state
+        self.parent = parent
+        self.action = action
+        self.cost = cost
+
+    def __eq__(self, other):
+        return self.state == other.state
+
+    def __hash__(self):
+        return hash(self.state)
+
+    def __str__(self):
+        return str(self.state + " " + str(self.cost))
+
+    def __repr__(self):
+        return str(self.state) + " " + str(self.cost)
+    
+    def get_path(self):
+        path = []
+        node = self
+        while node.parent:
+            path.append(node.action)
+            node = node.parent
+        path.reverse()
+        return path
+    
+    def is_in_path(self, state):
+        node = self
+        while node.parent:
+            if node.state == state:
+                return True
+            node = node.parent
+        return False
+
 
 def tinyMazeSearch(problem):
     """
@@ -87,17 +123,96 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currentState = problem.getStartState()
+    currentNode = Node(currentState, None, None, 0)
+    fringe = util.Stack()
+    fringe.push(currentNode)
+    expanded = []
+
+    while (True):
+        if fringe.isEmpty():
+            return None
+        currentNode = fringe.pop()
+        if currentNode.state in expanded:
+            continue
+
+        if problem.isGoalState(currentNode.state):
+            return currentNode.get_path()
+
+        successorTuples = problem.getSuccessors(currentNode.state)
+        expanded.append(currentNode.state)
+      
+        if successorTuples == []:
+            continue
+
+        notVisitedSuccessorTuples = [tuple for tuple in successorTuples if not currentNode.is_in_path(tuple[0])]
+
+        for tuple in notVisitedSuccessorTuples:
+            fringe.push(Node(tuple[0], currentNode, tuple[1], tuple[2]))
+        
+    # util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # "*** YOUR CODE HERE ***"
+    currentState = problem.getStartState()
+    currentNode = Node(currentState, None, None, 0)
+    fringe = util.Queue()
+    fringe.push(currentNode)
+    expanded = []
+    while (True):
+        if fringe.isEmpty():
+            return None
+        currentNode = fringe.pop()
+        if currentNode.state in expanded:
+            continue
 
+        if problem.isGoalState(currentNode.state):
+            return currentNode.get_path()
+
+        successorTuples = problem.getSuccessors(currentNode.state)
+        expanded.append(currentNode.state)
+  
+        if successorTuples == []:
+            continue
+
+        notVisitedSuccessorTuples = [tuple for tuple in successorTuples if not currentNode.is_in_path(tuple[0])]
+
+        for tuple in notVisitedSuccessorTuples:
+            fringe.push(Node(tuple[0], currentNode, tuple[1], tuple[2]))
+        
+    # util.raiseNotDefined()
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currentState = problem.getStartState()
+    currentNode = Node(currentState, None, None, 0)
+    fringe = util.PriorityQueue()
+    fringe.push(currentNode, currentNode.cost)
+    expanded = []
+    
+    while (True):
+        if fringe.isEmpty():
+            return None
+      
+        currentNode = fringe.pop()
+        if currentNode.state in expanded:
+            continue
+
+        if problem.isGoalState(currentNode.state):
+            return currentNode.get_path()
+
+        successorTuples = problem.getSuccessors(currentNode.state)
+        expanded.append(currentNode.state)
+  
+        if successorTuples == []:
+            continue
+
+        notVisitedSuccessorTuples = [tuple for tuple in successorTuples if not currentNode.is_in_path(tuple[0])]
+
+        for tuple in notVisitedSuccessorTuples:
+            fringe.push(Node(tuple[0], currentNode, tuple[1], currentNode.cost + tuple[2]), currentNode.cost + tuple[2])
+    # util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +224,34 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currentState = problem.getStartState()
+    currentNode = Node(currentState, None, None, 0)
+    fringe = util.PriorityQueue()
+    fringe.push(currentNode, currentNode.cost)
+    expanded = []
+    
+    while (True):
+        if fringe.isEmpty():
+            return None
+      
+        currentNode = fringe.pop()
+        if currentNode.state in expanded:
+            continue
+
+        if problem.isGoalState(currentNode.state):
+            return currentNode.get_path()
+
+        successorTuples = problem.getSuccessors(currentNode.state)
+        expanded.append(currentNode.state)
+  
+        if successorTuples == []:
+            continue
+
+        notVisitedSuccessorTuples = [tuple for tuple in successorTuples if not currentNode.is_in_path(tuple[0])]
+
+        for tuple in notVisitedSuccessorTuples:
+            fringe.push(Node(tuple[0], currentNode, tuple[1], currentNode.cost + tuple[2]), currentNode.cost + tuple[2] + heuristic(tuple[0], problem))
+    # util.raiseNotDefined()
 
 
 # Abbreviations
