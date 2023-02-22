@@ -87,16 +87,59 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    fringe = util.Stack()
+    start = [problem.getStartState(), 0, []]
+    fringe.push(start)
+    closed = []
+    while not fringe.isEmpty():
+        [state, cost, path] = fringe.pop()
+        if problem.isGoalState(state):
+            return path
+        if not state in closed:
+            closed.append(state)
+            for child_state, child_action, child_cost in problem.getSuccessors(state):
+                new_cost = cost + child_cost
+                new_path = path + [child_action]
+                fringe.push([child_state, new_cost, new_path])
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    fringe = util.Queue()
+    start = [problem.getStartState(), 0, []]
+    fringe.push(start)  # queue push at index_0
+    closed = []
+    while not fringe.isEmpty():
+        [state, cost, path] = fringe.pop()
+        if problem.isGoalState(state):
+            return path
+        if state not in closed:
+            closed.append(state)
+            for child_state, child_action, child_cost in problem.getSuccessors(state):
+                new_cost = cost + child_cost
+                new_path = path + [child_action]
+                fringe.push([child_state, new_cost, new_path])
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    fringe = util.PriorityQueue()
+    start = [problem.getStartState(), 0, []]
+    p = 0
+    fringe.push(start, p)  # queue push at index_0
+    closed = []
+    while not fringe.isEmpty():
+        [state, cost, path] = fringe.pop()
+        if problem.isGoalState(state):
+            return path
+        if state not in closed:
+            closed.append(state)
+            for child_state, child_action, child_cost in problem.getSuccessors(state):
+                new_cost = cost + child_cost
+                new_path = path + [child_action, ]
+                fringe.push([child_state, new_cost, new_path], new_cost)
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -109,6 +152,23 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    fringe = util.PriorityQueue()
+    start = [problem.getStartState(), 0, []]
+    p = 0
+    fringe.push(start, p)  # queue push at index_0
+    closed = []
+    while not fringe.isEmpty():
+        [state, cost, path] = fringe.pop()
+        # print(state)
+        if problem.isGoalState(state):
+            # print(path)
+            return path  # here is a deep first algorithm in a sense
+        if state not in closed:
+            closed.append(state)
+            for child_state, child_action, child_cost in problem.getSuccessors(state):
+                new_cost = cost + child_cost
+                new_path = path + [child_action, ]
+                fringe.push([child_state, new_cost, new_path], new_cost + heuristic(child_state, problem))
     util.raiseNotDefined()
 
 
