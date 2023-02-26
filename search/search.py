@@ -61,7 +61,6 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -87,17 +86,64 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    check = set()
+    st = util.Stack()
+    st.push((problem.getStartState(), []))
+
+    while st.isEmpty() is False:
+        u, res = st.pop()
+
+        if problem.isGoalState(u) is True:
+            return res
+            
+        if u not in check:
+            check.add(u)
+            for v, action, _ in problem.getSuccessors(u):
+                st.push((v, res + [action]))
+
+    return []
+    
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    check = set()
+    st = util.Queue()
+    st.push((problem.getStartState(), []))
+
+    while st.isEmpty() is False:
+        u, res = st.pop()
+
+        if problem.isGoalState(u) is True:
+            return res
+            
+        if u not in check:
+            check.add(u)
+            for v, action, _ in problem.getSuccessors(u):
+                st.push((v, res + [action]))
+
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    check = set()
+    st = util.PriorityQueue()
+    st.push((problem.getStartState(), [], 0), 0)
+
+    while st.isEmpty() is False:
+        u, res, heigh = st.pop()
+
+        if problem.isGoalState(u) is True:
+            return res
+            
+        if u not in check:
+            check.add(u)
+            for v, action, cost in problem.getSuccessors(u):
+                st.push((v, res + [action], cost + heigh), cost + heigh)
+
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +155,22 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    check = set()
+    st = util.PriorityQueue()
+    st.push((problem.getStartState(), [], 0), 0)
+
+    while st.isEmpty() is False:
+        u, res, heigh = st.pop()
+
+        if problem.isGoalState(u) is True:
+            return res
+            
+        if u not in check:
+            check.add(u)
+            for v, action, cost in problem.getSuccessors(u):
+                st.push((v, res + [action], cost + heigh), cost + heigh + heuristic(v, problem))
+
+    return []
 
 
 # Abbreviations
