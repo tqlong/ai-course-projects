@@ -74,7 +74,25 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        if action == 'STOP':
+            return -999999999
+        
+        currentPosition = list(newPos)
+
+        for ghostState in newGhostStates:
+            if ghostState.scaredTimer == 0 and ghostState.getPosition() == tuple(currentPosition): # CurrentPo has a ghost
+                return -999999999
+            
+        min = 999999999
+        v = 0
+        currentFood = currentGameState.getFood()
+        foodList = currentFood.asList()
+        for i in range(len(foodList)):
+            v = (manhattanDistance(foodList[i], currentPosition))
+            if v < min:
+                min = v
+        min = -min
+        return min
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -135,19 +153,81 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = self.minimax(0, 0, gameState) 
+        return action
+
+    def minimax(self, currentDepth, agentIndex, gameState):
+        if agentIndex >= gameState.getNumAgents():
+            agentIndex = 0
+            currentDepth += 1
+            
+        if currentDepth == self.depth:
+            return None, self.evaluationFunction(gameState)
+        
+        bestScore, chosenAction = None, None
+        if agentIndex == 0:  # pacman
+            for action in gameState.getLegalActions(agentIndex): 
+                newState = gameState.generateSuccessor(agentIndex, action)
+                _, score = self.minimax(currentDepth, agentIndex + 1, newState)
+                if bestScore is None or score > bestScore:
+                    bestScore, chosenAction = score, action
+        else:  # ghost
+            for action in gameState.getLegalActions(agentIndex):  
+                newState = gameState.generateSuccessor(agentIndex, action)
+                _, score = self.minimax(currentDepth, agentIndex + 1, newState)
+                if bestScore is None or score < bestScore:
+                    bestScore, chosenAction = score, action
+       
+        if bestScore is None:
+            return None, self.evaluationFunction(gameState)
+        
+        return chosenAction, bestScore  
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
-    Your minimax agent with alpha-beta pruning (question 3)
+      Your minimax agent with alpha-beta pruning (question 3)
     """
 
     def getAction(self, gameState):
         """
-        Returns the minimax action using self.depth and self.evaluationFunction
+          Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = self.alpha_beta(0, 0, gameState, -999999999, 999999999)
+        return action
+
+    def alpha_beta(self, currentDepth, agentIndex, gameState, alpha, beta):
+        if agentIndex >= gameState.getNumAgents():
+            agentIndex = 0
+            currentDepth += 1
+        
+        if currentDepth == self.depth:
+            return None, self.evaluationFunction(gameState)
+        
+        bestScore, chosenAction = None, None
+        if agentIndex == 0:  # pacman
+            for action in gameState.getLegalActions(agentIndex):
+                newState = gameState.generateSuccessor(agentIndex, action)
+                _, score = self.alpha_beta(currentDepth, agentIndex + 1, newState, alpha, beta)
+                if bestScore is None or score > bestScore:
+                    bestScore, chosenAction = score, action
+                alpha = max(alpha, score)
+                if alpha > beta:
+                    break
+        else:  # ghost
+            for action in gameState.getLegalActions(agentIndex):
+                newState = gameState.generateSuccessor(agentIndex, action)
+                _, score = self.alpha_beta(currentDepth, agentIndex + 1, newState, alpha, beta)
+                if bestScore is None or score < bestScore:
+                    bestScore, chosenAction = score, action
+                beta = min(beta, score)
+                if beta < alpha:
+                    break
+        
+        if bestScore is None:
+            return None, self.evaluationFunction(gameState)
+        
+        return chosenAction, bestScore  
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -162,7 +242,40 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = self.expectimax(0, 0, gameState)
+        return action
+
+    def expectimax(self, currentDepth, agentIndex, gameState):
+        if agentIndex >= gameState.getNumAgents():
+            agentIndex = 0
+            currentDepth += 1
+        
+        if currentDepth == self.depth:
+            return None, self.evaluationFunction(gameState)
+        
+        bestScore, chosenAction = None, None
+        if agentIndex == 0:  # pacman
+            for action in gameState.getLegalActions(agentIndex):
+                newState = gameState.generateSuccessor(agentIndex, action)
+                _, score = self.expectimax(currentDepth, agentIndex + 1, newState)
+                if bestScore is None or score > bestScore:
+                    bestScore, chosenAction = score, action
+        else: # exp
+            ghostActions = gameState.getLegalActions(agentIndex)
+            if len(ghostActions) is not 0:
+                probability = 1.0 / len(ghostActions)
+            for action in gameState.getLegalActions(agentIndex):
+                newState = gameState.generateSuccessor(agentIndex, action)
+                _, score = self.expectimax(currentDepth, agentIndex + 1, newState)
+                if bestScore is None:
+                    bestScore = 0.0
+                bestScore += probability * score
+                chosenAction = action
+        
+        if bestScore is None:
+            return None, self.evaluationFunction(gameState)
+        
+        return chosenAction, bestScore
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -170,9 +283,28 @@ def betterEvaluationFunction(currentGameState):
     evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
+    Adding distance between capsules and pacman, excluding distance between ghost and pacman from current score. 
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    capsules = currentGameState.getCapsules()   
+    ghostStates = currentGameState.getGhostStates()
+    currentPos = currentGameState.getPacmanPosition()
+    currentScore = currentGameState.getScore()
+    capScore = 0
+
+    for capsule in capsules:
+        capDistance = min([manhattanDistance(currentPos, capsule)])
+        if capDistance == 0:
+            capScore = 1.0/capDistance
+        else:
+            capScore = -100
+    
+    for ghost in ghostStates:
+        ghostPos = ghost.getPosition()
+        ghostDistance = manhattanDistance(currentPos, ghostPos)
+
+    return currentScore - ghostDistance + capScore
+
 
 # Abbreviation
 better = betterEvaluationFunction
