@@ -35,7 +35,15 @@ def buyLotsOfFruit(orderList):
     Returns cost of order
     """
     totalCost = 0.0
-    "*** YOUR CODE HERE ***"
+    fruits = fruitPrices.keys()
+
+    for (fruit, numPounds) in orderList:
+        if fruit in fruits:
+            totalCost += fruitPrices.get(fruit) * numPounds
+        else:
+            print(fruit, " doesn't appear in fruitPrices")
+            return None
+
     return totalCost
 
 
