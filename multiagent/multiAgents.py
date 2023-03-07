@@ -74,7 +74,30 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        currentPos = list(successorGameState.getPacmanPosition())
+
+        min = 999999999
+        dist = 0
+
+        currentFood = currentGameState.getFood()
+        foodList = currentFood.asList()
+
+        for i in range(len(foodList)):
+            dist = (manhattanDistance(foodList[i], currentPos))
+            if dist < min:
+                min = dist
+        # reverse to choose the closest food in getAction
+        min = -min
+
+        for state in newGhostStates:
+            if state.scaredTimer == 0 and state.getPosition() == tuple(currentPos):
+                return -999999999
+        
+        if action == 'Stop':
+            return -999999999
+        
+        return min
+
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -108,35 +131,66 @@ class MultiAgentSearchAgent(Agent):
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
-    Your minimax agent (question 2)
+      Your minimax agent (question 2)
     """
 
     def getAction(self, gameState):
         """
-        Returns the minimax action from the current gameState using self.depth
-        and self.evaluationFunction.
-
-        Here are some method calls that might be useful when implementing minimax.
-
-        gameState.getLegalActions(agentIndex):
-        Returns a list of legal actions for an agent
-        agentIndex=0 means Pacman, ghosts are >= 1
-
-        gameState.generateSuccessor(agentIndex, action):
-        Returns the successor game state after an agent takes an action
-
-        gameState.getNumAgents():
-        Returns the total number of agents in the game
-
-        gameState.isWin():
-        Returns whether or not the game state is a winning state
-
-        gameState.isLose():
-        Returns whether or not the game state is a losing state
+          Returns the minimax action from the current gameState using self.depth
+          and self.evaluationFunction.
+          Here are some method calls that might be useful when implementing minimax.
+          gameState.getLegalActions(agentIndex):
+            Returns a list of legal actions for an agent
+            agentIndex=0 means Pacman, ghosts are >= 1
+          gameState.generateSuccessor(agentIndex, action):
+            Returns the successor game state after an agent takes an action
+          gameState.getNumAgents():
+            Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = self.minimax(0, 0, gameState)  
+        return action 
 
+    def minimax(self, curr_depth, agent_index, gameState):
+        '''
+        Returns the best score for an agent using the minimax algorithm. For max player (agent_index=0), the best
+        score is the maximum score among its successor states and for the min player (agent_index!=0), the best
+        score is the minimum score among its successor states. Recursion ends if there are no successor states
+        available or curr_depth equals the max depth to be searched until.
+        :param curr_depth: the current depth of the tree (int)
+        :param agent_index: index of the current agent (int)
+        :param gameState: the current state of the game (GameState)
+        :return: action, score
+        '''
+        # increase depth and restart agent index when all have finished
+        if agent_index >= gameState.getNumAgents():
+            agent_index = 0
+            curr_depth += 1
+        # Return the max balue calculate by evalfunc for the max depth
+        if curr_depth == self.depth:
+            return None, self.evaluationFunction(gameState)
+        best_score, best_action = None, None
+        #pacman's turn
+        if agent_index == 0:  
+            for action in gameState.getLegalActions(agent_index):  
+                next_game_state = gameState.generateSuccessor(agent_index, action)
+                # Increase agent_index by 1 to ghost turn 
+                _, score = self.minimax(curr_depth, agent_index + 1, next_game_state)
+                if best_score is None or score > best_score:
+                    best_score = score
+                    best_action = action
+        #ghost turn 
+        else: 
+            for action in gameState.getLegalActions(agent_index):  
+                next_game_state = gameState.generateSuccessor(agent_index, action)
+                # Increase agent_index by 1 to pacman turn 
+                _, score = self.minimax(curr_depth, agent_index + 1, next_game_state)
+                if best_score is None or score < best_score:
+                    best_score = score
+                    best_action = action
+        if best_score is None:
+            return None, self.evaluationFunction(gameState)
+        return best_action, best_score  
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -147,7 +201,55 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        inf = float('inf')
+        action, score = self.alpha_beta(0, 0, gameState, -inf, inf)  
+        return action  
+    def alpha_beta(self, curr_depth, agent_index, gameState, alpha, beta):
+        '''
+        Returns the best score for an agent using the alpha-beta algorithm. For max player (agent_index=0), the best
+        score is the maximum score among its successor states and for the min player (agent_index!=0), the best
+        score is the minimum score among its successor states. Recursion ends if there are no successor states
+        available or curr_depth equals the max depth to be searched until. If alpha > beta, we can stop generating
+        further successors and prune the search tree.
+        :param curr_depth: the current depth of the tree (int)
+        :param agent_index: index of the current agent (int)
+        :param gameState: the current state of the game (GameState)
+        :param alpha: the alpha value of the parent (float)
+        :param beta: the beta value of the parent (float)
+        :return: action, score
+        '''
+        #Increase curdepth when all finish
+        if agent_index >= gameState.getNumAgents():
+            agent_index = 0
+            curr_depth += 1
+        if curr_depth == self.depth:
+            return None, self.evaluationFunction(gameState)
+        best_score, best_action = None, None
+        #pacman turn 
+        if agent_index == 0: 
+            for action in gameState.getLegalActions(agent_index):  
+                next_game_state = gameState.generateSuccessor(agent_index, action)
+                _, score = self.alpha_beta(curr_depth, agent_index + 1, next_game_state, alpha, beta)
+                if best_score is None or score > best_score:
+                    best_score = score
+                    best_action = action
+                alpha = max(alpha, score)
+                if alpha > beta:
+                    break
+        #ghost turn 
+        else:  
+            for action in gameState.getLegalActions(agent_index):  
+                next_game_state = gameState.generateSuccessor(agent_index, action)
+                _, score = self.alpha_beta(curr_depth, agent_index + 1, next_game_state, alpha, beta)
+                if best_score is None or score < best_score:
+                    best_score = score
+                    best_action = action
+                beta = min(beta, score)
+                if beta < alpha:
+                    break
+        if best_score is None:
+            return None, self.evaluationFunction(gameState)
+        return best_action, best_score 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -162,7 +264,56 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        action, score = self.expectimax(0, 0, gameState)  
+        return action  
+    def expectimax(self, curr_depth, agent_index, gameState):
+        '''
+        Returns the best score for an agent using the expectimax algorithm. For max player (agent_index=0), the best
+        score is the maximum score among its successor states and for the min player (agent_index!=0), the best
+        score is the average of all its successor states. Recursion ends if there are no successor states
+        available or curr_depth equals the max depth to be searched until.
+        :param curr_depth: the current depth of the tree (int)
+        :param agent_index: index of the current agent (int)
+        :param gameState: the current state of the game (GameState)
+        :return: action, score
+        '''
+        if agent_index >= gameState.getNumAgents():
+            agent_index = 0
+            curr_depth += 1
+        if curr_depth == self.depth:
+            return None, self.evaluationFunction(gameState)
+        best_score, best_action = None, None
+        #pacman turn 
+        if agent_index == 0:  
+            for action in gameState.getLegalActions(agent_index):  
+                # Get the expectimax score of successor
+                # Increase agent_index by 1 to ghost turn
+                next_game_state = gameState.generateSuccessor(agent_index, action)
+                _, score = self.expectimax(curr_depth, agent_index + 1, next_game_state)
+                if best_score is None or score > best_score:
+                    best_score = score
+                    best_action = action
+        #ghost turn 
+        else:  
+            ghostActions = gameState.getLegalActions(agent_index)
+            #calculate probability
+            if len(ghostActions) is not 0:
+                prob = 1.0 / len(ghostActions)
+            for action in gameState.getLegalActions(agent_index):  
+                # For each legal action of ghost agent
+                # Get the expectimax score of successor by the probability
+                # Increase agent_index by 1 to pacman turn 
+                next_game_state = gameState.generateSuccessor(agent_index, action)
+                _, score = self.expectimax(curr_depth, agent_index + 1, next_game_state)
+
+                if best_score is None:
+                    best_score = 0.0
+                best_score += prob * score
+                best_action = action
+        if best_score is None:
+            return None, self.evaluationFunction(gameState)
+        return best_action, best_score  
+
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -172,6 +323,45 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
+    # Setup information to be used as arguments in evaluation function
+    pacman_position = currentGameState.getPacmanPosition()
+    ghost_positions = currentGameState.getGhostPositions()
+
+    food_list = currentGameState.getFood().asList()
+    food_count = len(food_list)
+    capsule_count = len(currentGameState.getCapsules())
+    closest_food = 1
+
+    game_score = currentGameState.getScore()
+
+    # Find distances from pacman to all food
+    food_distances = [manhattanDistance(pacman_position, food_position) for food_position in food_list]
+
+    # Set value for closest food if there is still food left
+    if food_count > 0:
+        closest_food = min(food_distances)
+
+    # Find distances from pacman to ghost(s)
+    for ghost_position in ghost_positions:
+        ghost_distance = manhattanDistance(pacman_position, ghost_position)
+
+        # If ghost is too close to pacman, prioritize escaping instead of eating the closest food
+        # by resetting the value for closest distance to food
+        if ghost_distance < 2:
+            closest_food = 99999
+
+    features = [1.0 / closest_food,
+                game_score,
+                food_count,
+                capsule_count]
+
+    weights = [10,
+               200,
+               -100,
+               -10]
+
+    # Linear combination of features
+    return sum([feature * weight for feature, weight in zip(features, weights)])
     util.raiseNotDefined()
 
 # Abbreviation
