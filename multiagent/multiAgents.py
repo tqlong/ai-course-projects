@@ -279,28 +279,26 @@ def betterEvaluationFunction(currentGameState):
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
     newGhostStates = currentGameState.getGhostStates()
-    weightFood = 10.0
-    weightGhost = -10.0
-    weightScaredGhost = 100.0
-    INF = 100000000.0
-
-    score = currentGameState.getScore()
-
-    for foodPos in newFood:
-        disToFood = [manhattanDistance(newPos, foodPos)]
-        if len(disToFood) > 0:
-            score += weightFood / min(disToFood)
-        else:
-            score += weightFood
+    
+    foodDist = float("inf")
+    ghostDist = float("inf")
+    capsuleDist = float("inf")
+    for food in newFood.asList():
+        dist = util.manhattanDistance(newPos, food)
+        if dist < foodDist:
+            foodDist = dist
     for ghost in newGhostStates:
-        dis = manhattanDistance(newPos, ghost.getPosition())
-        if dis > 0:
-            if ghost.scaredTimer > 0:
-                score += weightScaredGhost / dis
-            else:
-                score += weightGhost / dis
-        else:
-            return -INF 
+        dist = util.manhattanDistance(newPos, ghost.getPosition())
+        if dist < ghostDist:
+            ghostDist = dist
+    remaining_food = currentGameState.getNumFood()
+    capsules = currentGameState.getCapsules()
+    for capsule in capsules:
+        dist = util.manhattanDistance(newPos, capsule)
+        if dist < capsuleDist:
+            capsuleDist = dist
+    score = 1/ (foodDist + 1) + currentGameState.getScore() - 1 / (ghostDist + 1) + 1 / (remaining_food+1) + 2/(capsuleDist + 1)
+
     return score
     
 
