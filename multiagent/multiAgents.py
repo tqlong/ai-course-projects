@@ -12,6 +12,7 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+from game import Actions
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -74,8 +75,52 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        # Get information about the current state - position
+        currentPos = currentGameState.getPacmanPosition()
+        
+        # Check for best or worst cases
+        # Highest scores for winning state:
+        if successorGameState.isWin():
+            return 99999
+        
+        # Worst case if Pacman and ghost position are the same but ghost is not scared
+        for state in newGhostStates:
+            if state.getPosition() == newPos and state.scaredTimer == 0: 
+                return -99999
+        
+        score = 0
+        foodList = newFood.asList()
+        # For an action that causes Pacman to stop, negative score to avoid thrashing:
+        if action == 'Stop':
+            score -= 10
 
+        # Better score for state with food near and ghosts far
+        # Check food distances from Pacman by Manhattan distance
+        foodDistance = [util.manhattanDistance(newPos, food) \
+                        for food in foodList]
+        nearestFood = min(foodDistance)
+        # Nearer food has more weightage - take inverse
+        score += float(1/nearestFood)
+        score -= len(foodList)
+
+        # Check distance of ghost in current state and new states
+        currentGhostDistances = [util.manhattanDistance(currentPos, ghost.getPosition()) \
+                                 for ghost in currentGameState.getGhostStates()]
+        nearestCurrentGhost = min(currentGhostDistances)
+        
+        newGhostDistances = [util.manhattanDistance(newPos, ghost.getPosition())\
+                             for ghost in newGhostStates]
+        nearestNewGhost = min(newGhostDistances)
+
+        # Farther ghosts are better
+        if nearestNewGhost < nearestCurrentGhost:
+            score -= 0.0005
+        else:
+            score += 0.001
+        return successorGameState.getScore() + score
+        # If we set the penalty of closer ghost minimal if compared to the prize of eating food -> eliminate thrashing.
+        # If we set high penalty of stopping, we can eliminate the stopage.
+    
 def scoreEvaluationFunction(currentGameState):
     """
     This default evaluation function just returns the score of the state.
@@ -106,10 +151,54 @@ class MultiAgentSearchAgent(Agent):
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
+    # Check if terminal state
+    def isTerminalState(self, gameState):
+        return gameState.isWin() or gameState.isLose()
+    
+    # Check if it is Pacman's turn
+    def isPacman(self, agent):
+        return agent == 0
+
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
     """
+    # Max value of minimax function
+    def maxValue(self, gameState, agent, depth):
+        bestValue = float("-inf")
+        for action in gameState.getLegalActions(agent):
+            successor = gameState.generateSuccessor(agent, action)
+            v = self.minimax(successor, agent+1, depth)
+            bestValue = max(bestValue, v)
+
+            # Save the action that we will finally take, which is the best action that we perform at depth 1
+            if depth == 1 and bestValue == v:
+                self.action = action
+        return bestValue
+    
+    # Min value of minimax function
+    def minValue(self, gameState, agent, depth):
+        bestValue = float("inf")
+        for action in gameState.getLegalActions(agent):
+            successor = gameState.generateSuccessor(agent, action)
+            v = self.minimax(successor, agent+1, depth)
+            bestValue = min(bestValue, v)
+        return bestValue
+
+    # Minimax function
+    def minimax(self, gameState, agent=0, depth=0):
+        agent = agent % gameState.getNumAgents()
+
+        if self.isTerminalState(gameState):
+            return self.evaluationFunction(gameState)
+        
+        if self.isPacman(agent):
+            if depth < self.depth:
+                return self.maxValue(gameState, agent, depth+1)
+            else:
+                return self.evaluationFunction(gameState)
+        else:
+            return self.minValue(gameState,agent,depth)
 
     def getAction(self, gameState):
         """
@@ -135,25 +224,99 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.minimax(gameState)
+        return self.action
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
     """
+    def maxValue(self, gameState, agent, depth, alpha, beta):
+        bestValue = float("-inf")
+        for action in gameState.getLegalActions(agent):
+            successor = gameState.generateSuccessor(agent,action)
+            v = self.minimax(successor, agent+1, depth, alpha, beta)
+            bestValue = max(bestValue, v)
+            if depth == 1 and bestValue == v:
+                self.action = action
+            if bestValue > beta:
+                return bestValue
+            alpha = max(alpha, bestValue)
+        return bestValue
+    
+    def minValue(self, gameState, agent, depth, alpha, beta):
+        bestValue = float("inf")
+        for action in gameState.getLegalActions(agent):
+            successor = gameState.generateSuccessor(agent, action)
+            v = self.minimax(successor, agent + 1, depth, alpha, beta)
+            bestValue = min(bestValue, v)
+            if bestValue < alpha:
+                return bestValue
+            beta = min(beta, bestValue)
+        return bestValue
+    
+    def minimax(self, gameState, agent = 0, depth = 0, alpha = float("-inf"), beta = float("inf")):
+        agent = agent % gameState.getNumAgents()
+        
+        if self.isTerminalState(gameState):
+            return self.evaluationFunction(gameState)
+        
+        if self.isPacman(agent):
+            if depth < self.depth:
+                return self.maxValue(gameState, agent, depth+1, alpha, beta)
+            else:
+                return self.evaluationFunction(gameState)
+        else:
+            return self.minValue(gameState, agent, depth, alpha, beta)
 
     def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.minimax(gameState)
+        return self.action
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
     """
+    def maxValue(self, gameState, agent, depth):
+        bestValue = float("-inf")
+        for action in gameState.getLegalActions(agent):
+            successor = gameState.generateSuccessor(agent, action)
+            v = self.expectimax(successor, agent+1, depth)
+            bestValue = max(bestValue, v)
+            if depth == 1 and bestValue == v:
+                self.action = action
+        return bestValue
+    
+    def probability(self, legalActions):
+        # The adversary chooses amongst their actions uniformly at random
+        return 1.0/len(legalActions)
+    
+    def expValue(self, gameState, agent, depth):
+        legalActions = gameState.getLegalActions(agent)
+        v = 0
+        for action in legalActions:
+            successor = gameState.generateSuccessor(agent, action)
+            p = self.probability(legalActions)
+            v += p * self.expectimax(successor,agent+1,depth)
+        return v
+    
+    def expectimax(self, gameState, agent=0, depth=0):
+        agent = agent % gameState.getNumAgents()
 
+        if self.isTerminalState(gameState):
+            return self.evaluationFunction(gameState)
+        
+        if self.isPacman(agent):
+            if depth < self.depth:
+                return self.maxValue(gameState, agent, depth + 1)
+            else:
+                return self.evaluationFunction(gameState)
+        else:
+            return self.expValue(gameState, agent, depth)
     def getAction(self, gameState):
         """
         Returns the expectimax action using self.depth and self.evaluationFunction
@@ -162,7 +325,38 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.expectimax(gameState)
+        return self.action
+
+def closestItemDistance(currentGameState, items):
+    # BFS to find the maze distance from position to closest item
+    walls = currentGameState.getWalls()
+    start = currentGameState.getPacmanPosition()
+
+    # Dictionary storing the maze distance from start to any given position
+    distance = {start: 0}
+
+    # Set of visited positions in order to avoid revisiting them again
+    visited = {start}
+
+    queue = util.Queue()
+    queue.push(start)
+
+    while not queue.isEmpty():
+        position =x, y = queue.pop()
+        if position in items:
+            return distance[position]
+        for action in [Directions.NORTH, Directions. SOUTH, Directions.EAST, Directions.WEST]:
+            dx, dy = Actions.directionToVector(action)
+            next_position = nextx, nexty = int(x+dx), int(y+dy)
+
+            if not walls[nextx][nexty] and next_position not in visited:
+                queue.push(next_position)
+                visited.add(next_position)
+                # A single action separates position from next_position, so the distance is 1
+                distance[next_position] = distance[position] + 1
+    return None
+
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -172,6 +366,35 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
+    position = currentGameState.getPacmanPosition()
+    score = currentGameState.getScore()
+    ghostStates = currentGameState.getGhostStates()
+    foodList = currentGameState.getFood().asList()
+    capsuleList = currentGameState.getCapsules()
+
+    if currentGameState.isWin():
+        return float("inf")
+    if currentGameState.isLose():
+        return float("-inf")
+    
+    for ghost in ghostStates:
+        d = manhattanDistance(position, ghost.getPosition())
+        if ghost.scaredTimer > 6 and d < 2:
+            return float("inf")
+        elif ghost.scaredTimer < 5 and d < 2:
+            return float("-inf")
+        
+    # Distance to closest food pellet
+    # Note that at least one food pellet must exist,
+    # otherwise we would have already won!
+    foodDistance = 1.0/closestItemDistance(currentGameState, foodList)
+
+    # Distance to closest capsule
+    capsuleDistance = closestItemDistance(currentGameState, capsuleList)
+    capsuleDistance = 0.0 if capsuleDistance is None else 1.0/capsuleDistance
+
+    return 10.0*foodDistance+5.0*score +0.5*capsuleDistance
+
     util.raiseNotDefined()
 
 # Abbreviation
