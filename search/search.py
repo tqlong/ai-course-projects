@@ -87,16 +87,72 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    from game import Directions
+    import util
+    
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+    
+    expanded = set()
+    fringe = util.Stack()
+    
+    fringe.push((problem.getStartState(),[], 0))
+    while not fringe.isEmpty():
+        curState, curMove, curCost = fringe.pop()
+        if(not curState in expanded):
+            expanded.add(curState)
+            if( problem.isGoalState(curState)):
+                return curMove
+            for state, direction, cost in problem.getSuccessors(curState):
+                fringe.push((state, curMove+[direction],curCost+cost ))
+    
+    return[]
+
+    
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    
+    expanded = set()
+    fringe = util.Queue()
+    
+    fringe.push((problem.getStartState(),[], 0))
+    
+    while not fringe.isEmpty():
+        curState, curMove, curCost = fringe.pop()
+        if(not curState in expanded):
+            expanded.add(curState)
+            if(problem.isGoalState(curState)):
+                return curMove
+            for state, direction, cost in problem.getSuccessors(curState):
+                fringe.push((state, curMove + [direction], curCost +cost))
+    return []
+    
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    
+    expanded = set()
+    fringe = util.PriorityQueue()
+    
+    fringe.push((problem.getStartState(),[], 0), 0)
+    
+    while not fringe.isEmpty():
+        curState, curMove, curCost = fringe.pop()
+        if(not curState in expanded):
+            expanded.add(curState)
+            if(problem.isGoalState(curState)):
+                return curMove
+            for state, direction, cost in problem.getSuccessors(curState):
+                fringe.push((state, curMove + [direction], curCost +cost), curCost +cost)
+    return []
+    
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -104,11 +160,28 @@ def nullHeuristic(state, problem=None):
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
+    
+    
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    expanded = set()
+    fringe = util.PriorityQueue()
+    
+    fringe.push((problem.getStartState(),[], 0), 0 )
+    
+    while not fringe.isEmpty():
+        curState, curMove, curCost = fringe.pop()
+        if(not curState in expanded):
+            expanded.add(curState)
+            if(problem.isGoalState(curState)):
+                return curMove
+            for state, direction, cost in problem.getSuccessors(curState):
+                h = heuristic(state, problem)
+                fringe.push((state, curMove + [direction], curCost +cost), curCost +cost +h)
+    return []
     util.raiseNotDefined()
 
 
