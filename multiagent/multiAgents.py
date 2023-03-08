@@ -74,7 +74,50 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+
+        newFoodList = newFood.asList()
+        newCapsuleList = successorGameState.getCapsules()
+        newGhostPositions = successorGameState.getGhostPositions()
+
+        currentFoodList = currentGameState.getFood().asList()
+        currentCapsuleList = currentGameState.getCapsules()
+
+        minFoodDistance = 1e9
+        minCapsuleDistance = 1e9
+        minGhostDistance = 1e9
+
+        for food in newFoodList:
+            foodDistance = manhattanDistance(food, newPos)
+            if foodDistance == 0:
+                continue
+            minFoodDistance = min(minFoodDistance, foodDistance)
+
+        for capsule in newCapsuleList:
+            capsuleDistance = manhattanDistance(capsule, newPos)
+            if capsuleDistance == 0:
+                continue
+            minCapsuleDistance = min(minCapsuleDistance, capsuleDistance)
+
+        for ghost in newGhostPositions:
+            ghostDistance = manhattanDistance(ghost, newPos)
+            minGhostDistance = min(minGhostDistance, ghostDistance)
+
+        evaluation = 0
+
+        evaluation += 5000 * (len(currentFoodList) - len(newFoodList))
+        
+        if minFoodDistance != 1e9:
+            evaluation += 1000 + 1000.0 / minFoodDistance
+
+        evaluation += 5000 * (len(currentCapsuleList) - len(newCapsuleList))
+
+        if minCapsuleDistance != 1e9:
+            evaluation += 1000 + 1000.0 / minCapsuleDistance
+
+        if minGhostDistance < 2:
+            evaluation -= 100000
+
+        return evaluation
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -135,7 +178,34 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        nextActions = gameState.getLegalActions(0)
+        nextStates = [gameState.generateSuccessor(0, action) for action in nextActions]
+
+        nextScores = [self.minimax(0, state, 1) for state in nextStates]
+
+        maxScoreIndex = 0
+
+        for index, nextScore in enumerate(nextScores):
+            if nextScore > nextScores[maxScoreIndex]:
+                maxScoreIndex = index
+
+        return nextActions[maxScoreIndex]
+    
+    def minimax(self, depth, state, agentId):
+        end = depth == self.depth or state.isLose() or state.isWin()
+
+        if end:
+            return self.evaluationFunction(state)
+        
+        nextActions = state.getLegalActions(agentId)
+        nextStates = [state.generateSuccessor(agentId, action) for action in nextActions]
+        nextAgentId = (agentId + 1) % state.getNumAgents()
+        nextDepth = depth + (nextAgentId == 0)
+        nextScores = [self.minimax(nextDepth, nextState, nextAgentId) for nextState in nextStates]
+
+        if agentId == 0: return max(nextScores)
+
+        return min(nextScores)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
