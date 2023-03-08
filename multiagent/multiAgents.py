@@ -282,7 +282,34 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        nextActions = gameState.getLegalActions(0)
+        nextStates = [gameState.generateSuccessor(0, action) for action in nextActions]
+
+        nextScores = [self.expectimax(0, state, 1) for state in nextStates]
+
+        maxScoreIndex = 0
+
+        for index, nextScore in enumerate(nextScores):
+            if nextScore > nextScores[maxScoreIndex]:
+                maxScoreIndex = index
+
+        return nextActions[maxScoreIndex]
+
+    def expectimax(self, depth, state, agentId):
+        end = depth == self.depth or state.isLose() or state.isWin()
+
+        if end:
+            return self.evaluationFunction(state)
+        
+        nextActions = state.getLegalActions(agentId)
+        nextStates = [state.generateSuccessor(agentId, nextAction) for nextAction in nextActions]
+        nextAgentId = (agentId + 1) % state.getNumAgents()
+        nextDepth = depth + (nextAgentId == 0)
+
+        scores = [self.expectimax(nextDepth, nextState, nextAgentId) for nextState in nextStates]
+
+        if agentId == 0: return max(scores)
+        return sum(scores) / len(scores)
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -290,9 +317,45 @@ def betterEvaluationFunction(currentGameState):
     evaluation function (question 5).
 
     DESCRIPTION: <write something here so we know what you did>
+    - Prioritize eating closest food over closest capsule but give bonus on both
+    - Eat ghost if it is near and scared
+    - Run away from ghost if it is near and not scared
+    - Add score to evaluation to prevent agent from standing still
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    if currentGameState.isWin(): return 1e9
+    if currentGameState.isLose(): return -1e9
+
+    position = currentGameState.getPacmanPosition()
+    ghostStates = currentGameState.getGhostStates()
+    foodList = currentGameState.getFood().asList()
+    capsuleList = currentGameState.getCapsules()
+
+    evaluation = 0
+
+    minFoodDistance = 1e9
+    minCapsuleDistance = 1e9
+
+    for food in foodList:
+        foodDistance = manhattanDistance(food, position)
+        minFoodDistance = min(minFoodDistance, foodDistance)
+
+    for capsule in capsuleList:
+        capsuleDistance = manhattanDistance(capsule, position)
+        minCapsuleDistance = min(minCapsuleDistance, capsuleDistance)
+
+    for ghost in ghostStates:
+        ghostDistance = manhattanDistance(position, ghost.getPosition())
+        if ghost.scaredTimer > 6 and ghostDistance < 2:
+            return 1e9
+        elif ghost.scaredTimer < 5 and ghostDistance < 2:
+            return -1e9
+
+    evaluation += 10.0 / minFoodDistance
+    evaluation += 1.0 / minCapsuleDistance
+    evaluation += currentGameState.getScore()
+
+    return evaluation
 
 # Abbreviation
 better = betterEvaluationFunction
