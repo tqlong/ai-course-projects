@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -72,6 +73,24 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def blindSearch(problem, messages):
+    visited = []
+    startState = problem.getStartState()
+
+    if (problem.isGoalState(startState)):
+        return []
+
+    messages.push((startState, []))
+    while not messages.isEmpty():
+        state, directions = messages.pop()
+        if state not in visited:
+            visited.append(state)
+            if problem.isGoalState(state):
+                return directions
+            for successor in problem.getSuccessors(state):
+                messages.push((successor[0], directions + [successor[1]]))
+    return []
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,17 +106,17 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return blindSearch(problem, util.Stack())
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return blindSearch(problem, util.Queue())
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return costSearchWithHeuristicFn(problem, nullHeuristic)
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +128,32 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return costSearchWithHeuristicFn(problem, heuristic)
+
+def costSearchWithHeuristicFn(problem, heuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+    priorityQueue = util.PriorityQueue()
+    visited = []
+    startState = problem.getStartState()
+
+    if (problem.isGoalState(startState)):
+        return []
+
+    priorityQueue.push((startState, []), 0)
+    while not priorityQueue.isEmpty():
+        state, directions = priorityQueue.pop()
+        if state not in visited:
+            visited.append(state)
+            if problem.isGoalState(state):
+                return directions
+            for successor in problem.getSuccessors(state):
+                successorState = successor[0]
+                successorDirection = directions + [successor[1]]
+                cost = problem.getCostOfActions(successorDirection) + heuristic(successorState, problem)
+                priorityQueue.push((successorState, successorDirection), cost)
+
+    return []
 
 
 # Abbreviations
