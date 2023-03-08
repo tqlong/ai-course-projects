@@ -295,6 +295,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        return (self.startingPosition, self.corners)
         util.raiseNotDefined()
 
     def isGoalState(self, state):
@@ -302,20 +303,22 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        curPos, unvisitedCorners = state
+        return unvisitedCorners == (curPos,)
 
     def getSuccessors(self, state):
         """
         Returns successor states, the actions they require, and a cost of 1.
 
          As noted in search.py:
-            For a given state, this should return a list of triples, (successor,
+             For a given state, this should return a list of triples, (successor,
             action, stepCost), where 'successor' is a successor to the current
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
 
         successors = []
+        currentPosition, corners = state
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -323,9 +326,18 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
+            
+            x,y = currentPosition
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
 
             "*** YOUR CODE HERE ***"
-
+            if not self.walls[nextx][nexty]:
+                corners = tuple(corner for corner in corners if corner != currentPosition)                
+                nextState = ((nextx, nexty), corners)
+                cost = 1
+                successors.append((nextState, action, cost))
+            
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
@@ -360,7 +372,15 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    if not state[1]:
+        return 0
+    max = 0
+    currentPosition = state[0]
+    for corner in state[1]:
+        distance = sum(abs(a-b) for a, b in zip(currentPosition, corner))
+        if max < distance:
+            max = distance
+    return max
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -454,8 +474,15 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
-
+    foodGrid = foodGrid.asList()
+    if not state[1]:
+        return 0
+    max = 0
+    for corner in foodGrid:
+        distance = mazeDistance(position, corner, problem.startingGameState)
+        if max < distance:
+                max = distance
+    return max
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
@@ -485,6 +512,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        return search.breadthFirstSearch(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -519,8 +547,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
+        foodList = self.food.asList()
         "*** YOUR CODE HERE ***"
+        if state in foodList:
+            return True
+        return False
         util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
