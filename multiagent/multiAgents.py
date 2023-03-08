@@ -217,8 +217,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
+        nextActions = gameState.getLegalActions(0)
+        nextStates = [gameState.generateSuccessor(0, action) for action in nextActions]
+        
+        bestEvaluation = -1e9
+        alpha = -1e9
+        beta = 1e9
+
+        resultAction = None
+
+        for index, nextState in enumerate(nextStates):
+            evaluation = self.minimax(0, nextState, 1, alpha, beta)
+
+            if evaluation > bestEvaluation:
+                bestEvaluation = evaluation
+                resultAction = nextActions[index]
+            
+            alpha = max(alpha, bestEvaluation)
+
+        return resultAction
+    
+    def minimax(self, depth, state, agentId, alpha, beta):
+        end = depth == self.depth or state.isLose() or state.isWin()
+
+        if end:
+            return self.evaluationFunction(state)
+        
+        nextActions = state.getLegalActions(agentId)
+        nextAgentId = (agentId + 1) % state.getNumAgents()
+        nextDepth = depth + (nextAgentId == 0)
+
+        bestEvaluation = 1e9 if agentId != 0 else -1e9
+
+        for nextAction in nextActions:
+            nextState = state.generateSuccessor(agentId, nextAction)
+            evaluation = self.minimax(nextDepth, nextState, nextAgentId, alpha, beta)
+
+            if agentId == 0:
+                bestEvaluation = max(evaluation, bestEvaluation)
+                alpha = max(alpha, bestEvaluation)
+
+                if bestEvaluation > beta:
+                    return bestEvaluation
+            else:
+                bestEvaluation = min(evaluation, bestEvaluation)
+                beta = min(beta, bestEvaluation)
+
+                if bestEvaluation < alpha:
+                    return bestEvaluation
+            
+        return bestEvaluation
+        
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
