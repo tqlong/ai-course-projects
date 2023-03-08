@@ -259,53 +259,46 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        def expectimax(state, agentIndex, depth):
-            if state.isWin() or state.isLose() or depth == self.depth:
-                return self.evaluationFunction(state), None
+        # calling expectimax with the depth we are going to investigate
+        maxDepth = self.depth * gameState.getNumAgents()
+        return self.expectimax(gameState, "expect", maxDepth, 0)[0]
 
-            # If it's the player's turn, return the maximum value and corresponding action
-            if agentIndex == 0:
-                return max_value(state, agentIndex, depth)
-            # If it's a ghost's turn, return the expected value
+    def expectimax(self, gameState, action, depth, agentIndex):
+
+        if depth is 0 or gameState.isLose() or gameState.isWin():
+            return (action, self.evaluationFunction(gameState))
+
+        # if pacman (max agent) - return max successor value
+        if agentIndex is 0:
+            return self.maxvalue(gameState,action,depth,agentIndex)
+        # if ghost (EXP agent) - return probability value
+        else:
+            return self.expvalue(gameState,action,depth,agentIndex)
+
+    def maxvalue(self,gameState,action,depth,agentIndex):
+        bestAction = ("max", -(float('inf')))
+        for legalAction in gameState.getLegalActions(agentIndex):
+            nextAgent = (agentIndex + 1) % gameState.getNumAgents()
+            succAction = None
+            if depth != self.depth * gameState.getNumAgents():
+                succAction = action
             else:
-                return expect_value(state, agentIndex, depth)
-
-        def max_value(state, agentIndex, depth):
-            v = float('-inf')
-            bestAction = None
-
-            for action in state.getLegalActions(agentIndex):
-                successor = state.generateSuccessor(agentIndex, action)
-                successor_value, _ = expectimax(successor, 1, depth)
-                if successor_value > v:
-                    v = successor_value
-                    bestAction = action
-
-            # Return the maximum value and corresponding action
-            return v, bestAction
-
-        def expect_value(state, agentIndex, depth):
-            v = 0
-            numActions = len(state.getLegalActions(agentIndex))
-
-            # If the ghost has no legal actions, return the score of the current state and no action
-            if numActions == 0:
-                return self.evaluationFunction(state), None
-
-            for action in state.getLegalActions(agentIndex):
-                successor = state.generateSuccessor(agentIndex, action)
-                if agentIndex == state.getNumAgents() - 1:
-                    successor_value, _ = expectimax(successor, 0, depth + 1)
-                else:
-                    successor_value, _ = expectimax(successor, agentIndex + 1, depth)
-                v += successor_value
-
-            return v / numActions, None
-
-        # Call the expectimax function with the initial game state, the player agent (agentIndex = 0), and a depth of 0
-        # Return the corresponding action
-        _, bestAction = expectimax(gameState, 0, 0)
+                succAction = legalAction
+            succValue = self.expectimax(gameState.generateSuccessor(agentIndex, legalAction),
+                                        succAction,depth - 1,nextAgent)
+            bestAction = max(bestAction,succValue,key = lambda x:x[1])
         return bestAction
+
+    def expvalue(self,gameState,action,depth,agentIndex):
+        legalActions = gameState.getLegalActions(agentIndex)
+        averageScore = 0
+        propability = 1.0/len(legalActions)
+        for legalAction in legalActions:
+            nextAgent = (agentIndex + 1) % gameState.getNumAgents()
+            bestAction = self.expectimax(gameState.generateSuccessor(agentIndex, legalAction),
+                                         action, depth - 1, nextAgent)
+            averageScore += bestAction[1] * propability
+        return (action, averageScore)
 
 def betterEvaluationFunction(currentGameState):
     """
