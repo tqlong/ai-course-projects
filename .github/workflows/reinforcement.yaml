@@ -1,0 +1,45 @@
+name: P3-Reinforcement
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run:
+    runs-on: ubuntu-20.04
+    env:
+      OS: ubuntu-20.04
+      PYTHON: '3.6'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.6
+
+    - name: 'test reinforcement'
+      run: |
+        cd reinforcement
+        python autograder.py | python ../check_grade.py > /tmp/output
+        cat /tmp/output
+
+    - name: 'Add comment to PR'
+      env:
+        URL: ${{ github.event.pull_request.comments_url }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        COMMENT=$(cat /tmp/output)
+        echo $URL
+        curl \
+          -X POST \
+          -H "Content-Type: application/json" \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          --data "{ \"body\": \"P3-Reinforcement $COMMENT\" }" \
+          $URL
+
+    - name: 'check error'
+      run: python check_error.py < /tmp/output
